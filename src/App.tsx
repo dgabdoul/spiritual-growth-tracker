@@ -15,6 +15,8 @@ import Dashboard from "./pages/Dashboard";
 import AssessmentStart from "./pages/Assessment/AssessmentStart";
 import AssessmentCategory from "./pages/Assessment/AssessmentCategory";
 import AssessmentResults from "./pages/Assessment/AssessmentResults";
+import AssessmentHistory from "./pages/Assessment/AssessmentHistory";
+import PrintView from "./pages/Assessment/PrintView";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -66,6 +68,14 @@ const AppRoutes = () => {
           <AssessmentResults />
         </ProtectedRoute>
       } />
+      
+      <Route path="/assessment/history" element={
+        <ProtectedRoute>
+          <AssessmentHistory />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/assessment/print" element={<PrintView />} />
       
       {/* Catch all */}
       <Route path="*" element={<NotFound />} />

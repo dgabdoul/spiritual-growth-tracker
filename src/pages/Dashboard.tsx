@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,27 +7,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import Header from '@/components/Header';
 import CategoryCard from '@/components/CategoryCard';
 import ProgressBar from '@/components/ProgressBar';
-import { Brain, Heart, Lightbulb, Users, Coins, PlusCircle, CalendarDays, TrendingUp, LineChart as LineChartIcon } from 'lucide-react';
+import { 
+  Brain, Heart, Lightbulb, Users, Coins, PlusCircle, 
+  CalendarDays, TrendingUp, LineChart as LineChartIcon,
+  History, Printer, Download
+} from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const { assessmentHistory, startNewAssessment } = useAssessment();
   const navigate = useNavigate();
 
-  // Start a new assessment
   const handleStartAssessment = () => {
     startNewAssessment();
     navigate('/assessment');
   };
 
-  // Get the latest assessment if available
   const latestAssessment = assessmentHistory.length > 0 
     ? assessmentHistory[assessmentHistory.length - 1] 
     : null;
 
-  // Prepare data for the line chart
   const lineChartData = assessmentHistory.map(assessment => {
     const date = new Date(assessment.date).toLocaleDateString('fr-FR');
     return {
@@ -42,7 +44,6 @@ const Dashboard: React.FC = () => {
     };
   });
 
-  // Prepare data for the bar chart
   const barChartData = latestAssessment ? [
     { name: 'Psychologie', value: latestAssessment.scores.psychology || 0 },
     { name: 'Santé', value: latestAssessment.scores.health || 0 },
@@ -66,14 +67,12 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Get stats from assessment history
   const getStats = () => {
     if (assessmentHistory.length === 0) return null;
 
     const totalAssessments = assessmentHistory.length;
     const latestScore = latestAssessment?.overallScore || 0;
     
-    // Calculate improvement if we have more than one assessment
     let improvement = 0;
     if (assessmentHistory.length > 1) {
       const previousAssessment = assessmentHistory[assessmentHistory.length - 2];
@@ -87,25 +86,79 @@ const Dashboard: React.FC = () => {
     };
   };
 
+  const handlePrint = () => {
+    if (!latestAssessment) return;
+    
+    localStorage.setItem('printAssessment', JSON.stringify(latestAssessment));
+    
+    const printWindow = window.open('/assessment/print', '_blank');
+    if (printWindow) {
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+        }, 500);
+      };
+    }
+  };
+
+  const handleDownload = () => {
+    if (!latestAssessment) return;
+    
+    let csvContent = "Catégorie,Score\n";
+    
+    Object.entries(latestAssessment.scores).forEach(([category, score]) => {
+      const categoryName = 
+        category === 'psychology' ? 'Psychologie' :
+        category === 'health' ? 'Santé' :
+        category === 'spirituality' ? 'Spiritualité' :
+        category === 'relationships' ? 'Relations' : 'Finances';
+        
+      csvContent += `${categoryName},${score}\n`;
+    });
+    
+    csvContent += `\nScore Global,${latestAssessment.overallScore}\n`;
+    csvContent += `\nDate,${format(new Date(latestAssessment.date), 'dd/MM/yyyy', { locale: fr })}\n`;
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `evaluation_${format(new Date(latestAssessment.date), 'yyyy-MM-dd')}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const stats = getStats();
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        {/* Welcome and Quick Actions */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Bienvenue, {user?.email}</h1>
             <p className="text-gray-600 mt-1">Suivez votre évolution spirituelle et personnelle</p>
           </div>
-          <Button onClick={handleStartAssessment} className="bg-spirit-purple hover:bg-spirit-deep-purple">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Nouvelle Évaluation
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button 
+              onClick={() => navigate('/assessment/history')} 
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <History className="h-4 w-4" />
+              Historique
+            </Button>
+            <Button onClick={handleStartAssessment} className="bg-spirit-purple hover:bg-spirit-deep-purple">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Nouvelle Évaluation
+            </Button>
+          </div>
         </div>
 
-        {/* Statistics overview */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <Card>
@@ -154,7 +207,6 @@ const Dashboard: React.FC = () => {
           </div>
         )}
 
-        {/* No Assessments Yet */}
         {assessmentHistory.length === 0 && (
           <Card className="mb-8">
             <CardContent className="pt-6">
@@ -172,16 +224,24 @@ const Dashboard: React.FC = () => {
           </Card>
         )}
 
-        {/* Latest Assessment Results */}
         {latestAssessment && (
           <>
-            {/* Overall Score */}
             <Card className="mb-8">
-              <CardHeader>
-                <CardTitle>Résultats de la Dernière Évaluation</CardTitle>
-                <CardDescription>
-                  Complétée le {new Date(latestAssessment.date).toLocaleDateString('fr-FR')}
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Résultats de la Dernière Évaluation</CardTitle>
+                  <CardDescription>
+                    Complétée le {format(new Date(latestAssessment.date), 'dd MMMM yyyy', { locale: fr })}
+                  </CardDescription>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="icon" onClick={handlePrint} title="Imprimer le rapport">
+                    <Printer className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" onClick={handleDownload} title="Télécharger les données">
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col md:flex-row items-center gap-6">
@@ -210,7 +270,6 @@ const Dashboard: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Bar Chart */}
             <Card className="mb-8">
               <CardHeader>
                 <CardTitle>Vue Comparative par Catégorie</CardTitle>
@@ -234,7 +293,6 @@ const Dashboard: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Category Cards */}
             <h2 className="text-2xl font-semibold mb-4">Analyse Détaillée</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               <CategoryCard 
@@ -281,7 +339,6 @@ const Dashboard: React.FC = () => {
           </>
         )}
 
-        {/* Progress Chart */}
         {assessmentHistory.length > 1 && (
           <Card className="mb-8">
             <CardHeader>
