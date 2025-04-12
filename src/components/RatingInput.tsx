@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface RatingInputProps {
   value: number;
@@ -27,21 +28,28 @@ const RatingInput: React.FC<RatingInputProps> = ({
       {Array.from({ length: max }).map((_, index) => {
         const ratingValue = index + 1;
         return (
-          <button
-            key={ratingValue}
-            type="button"
-            onClick={() => onChange(ratingValue)}
-            title={ratingLabels[index]}
-            className={cn(
-              "w-10 h-10 rounded-full transition-all flex items-center justify-center text-sm font-medium",
-              value >= ratingValue
-                ? "bg-spirit-purple text-white ring-2 ring-spirit-light-purple shadow-md"
-                : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-            )}
-            aria-label={`${ratingLabels[index]} (${ratingValue} sur ${max})`}
-          >
-            {ratingValue}
-          </button>
+          <TooltipProvider key={ratingValue}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => onChange(ratingValue)}
+                  className={cn(
+                    "w-12 h-12 rounded-full transition-all flex items-center justify-center text-sm font-medium",
+                    value >= ratingValue
+                      ? "bg-spirit-purple text-white ring-2 ring-spirit-light-purple shadow-md"
+                      : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                  )}
+                  aria-label={`${ratingLabels[index]} (${ratingValue} sur ${max})`}
+                >
+                  {ratingValue}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{ratingLabels[index]}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         );
       })}
     </div>
