@@ -102,38 +102,43 @@ const AssessmentCategory: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
       <main className="max-w-2xl mx-auto py-10 px-4 sm:px-6">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Étape {currentIndex + 1} sur {categoryOrder.length}
             </span>
-            <span className="text-sm text-gray-500">{progressValue}% complété</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{progressValue.toFixed(0)}% complété</span>
           </div>
-          <Progress value={progressValue} className="h-2" />
+          <Progress value={progressValue} className="h-2 bg-gray-100 dark:bg-gray-800" />
         </div>
 
-        <Card className="shadow">
-          <CardHeader className="border-b border-gray-100">
+        <Card className="shadow-md border-0 overflow-hidden">
+          <CardHeader className="border-b bg-white dark:bg-gray-800 px-6 py-4">
             <div className="flex items-center gap-3">
-              <div className="text-spirit-purple">{categoryIcons[currentCategory]}</div>
-              <CardTitle className="text-xl">{categoryTitles[currentCategory]}</CardTitle>
+              <div className="text-spirit-purple p-2 bg-spirit-soft-purple dark:bg-purple-900/30 rounded-full">
+                {categoryIcons[currentCategory]}
+              </div>
+              <CardTitle className="text-xl font-semibold">
+                {categoryTitles[currentCategory]}
+              </CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="pt-6">
-            <div className="mb-4 bg-gray-50 p-3 rounded-md text-sm">
-              <div className="font-medium mb-1 flex items-center">
-                <span>Notation</span>
+          <CardContent className="p-6 bg-white dark:bg-gray-800">
+            <div className="mb-6 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg text-sm border border-gray-100 dark:border-gray-700">
+              <div className="font-medium mb-2 flex items-center gap-1.5">
+                <span>Système de notation</span>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-5 w-5 ml-1">
+                      <Button variant="ghost" size="icon" className="h-5 w-5 rounded-full">
                         <HelpCircle className="h-3 w-3" />
+                        <span className="sr-only">Aide sur la notation</span>
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent className="w-64 p-3 bg-black/90 text-white border-none">
                       <div className="space-y-1 text-xs">
                         {ratingLegend.map(rating => (
                           <div key={rating.value} className="flex items-center gap-1">
@@ -145,16 +150,16 @@ const AssessmentCategory: React.FC = () => {
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              <div className="flex justify-between text-xs text-gray-500">
+              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
                 <span>Délaissé (1)</span>
                 <span>Excellent (5)</span>
               </div>
             </div>
 
-            <div className="space-y-8">
+            <div className="space-y-10">
               {categoryQuestions.map((question) => (
                 <div key={question.id} className="animate-fadeIn">
-                  <h3 className="text-lg font-medium mb-3">{question.text}</h3>
+                  <h3 className="text-base font-medium mb-4 text-gray-800 dark:text-gray-200">{question.text}</h3>
                   <RatingInput
                     value={answers[question.id] || 0}
                     onChange={(value) => handleRatingChange(question.id, value)}
@@ -164,18 +169,18 @@ const AssessmentCategory: React.FC = () => {
               ))}
             </div>
           </CardContent>
-          <CardFooter className="flex justify-between pt-4 border-t border-gray-100">
+          <CardFooter className="flex justify-between pt-4 p-6 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-800">
             <Button
               variant="outline"
               onClick={navigateToPreviousCategory}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 border-gray-200 dark:border-gray-700 dark:bg-transparent dark:text-gray-300 dark:hover:bg-gray-800"
             >
               <ArrowLeft size={16} />
               Précédent
             </Button>
             <Button
               onClick={navigateToNextCategory}
-              className="bg-spirit-purple hover:bg-spirit-deep-purple flex items-center gap-2"
+              className="bg-spirit-purple hover:bg-spirit-deep-purple flex items-center gap-2 shadow-sm"
               disabled={isSubmitting}
             >
               {nextButtonLabel}

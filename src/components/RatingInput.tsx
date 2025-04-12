@@ -24,7 +24,7 @@ const RatingInput: React.FC<RatingInputProps> = ({
   ];
 
   return (
-    <div className="flex gap-2 justify-between my-2">
+    <div className="flex gap-2 justify-between my-3">
       {Array.from({ length: max }).map((_, index) => {
         const ratingValue = index + 1;
         return (
@@ -35,17 +35,17 @@ const RatingInput: React.FC<RatingInputProps> = ({
                   type="button"
                   onClick={() => onChange(ratingValue)}
                   className={cn(
-                    "w-12 h-12 rounded-full transition-all flex items-center justify-center text-sm font-medium",
+                    "w-12 h-12 rounded-lg transition-all flex items-center justify-center text-sm font-medium shadow-sm",
                     value >= ratingValue
-                      ? "bg-spirit-purple text-white ring-2 ring-spirit-light-purple shadow-md"
-                      : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      ? "bg-spirit-purple text-white shadow-md ring-1 ring-spirit-light-purple"
+                      : "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200"
                   )}
                   aria-label={`${ratingLabels[index]} (${ratingValue} sur ${max})`}
                 >
                   {ratingValue}
                 </button>
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent className="px-3 py-1.5 text-xs bg-black/80 text-white border-none">
                 <p>{ratingLabels[index]}</p>
               </TooltipContent>
             </Tooltip>
