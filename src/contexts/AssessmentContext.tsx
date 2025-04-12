@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 // Define the categories and their questions
@@ -36,37 +35,44 @@ interface AssessmentContextType {
   getAdvice: (category: Category) => string;
 }
 
-// Sample questions
+// Updated questions based on provided criteria
 export const questions: Question[] = [
   // Psychology
-  { id: 'psy1', text: 'I effectively manage my stress and anxiety', category: 'psychology' },
-  { id: 'psy2', text: 'I have a positive mindset most days', category: 'psychology' },
-  { id: 'psy3', text: 'I am aware of my emotions and can regulate them', category: 'psychology' },
-  { id: 'psy4', text: 'I practice mindfulness regularly', category: 'psychology' },
+  { id: 'psy1', text: 'Persévérance', category: 'psychology' },
+  { id: 'psy2', text: 'Silence et maîtrise de la colère', category: 'psychology' },
+  { id: 'psy3', text: 'Se mêler de ses affaires (Éviter l\'ingérence)', category: 'psychology' },
+  { id: 'psy4', text: 'Réfléchir avant de parler', category: 'psychology' },
+  { id: 'psy5', text: 'Être satisfait de ce qu\'on a (Contentement)', category: 'psychology' },
   
   // Health
-  { id: 'hea1', text: 'I maintain a balanced diet', category: 'health' },
-  { id: 'hea2', text: 'I exercise regularly', category: 'health' },
-  { id: 'hea3', text: 'I get enough quality sleep', category: 'health' },
-  { id: 'hea4', text: 'I avoid harmful substances', category: 'health' },
+  { id: 'hea1', text: 'Boire en 3 temps (Selon la Sunna)', category: 'health' },
+  { id: 'hea2', text: 'Manger peu (Modération alimentaire)', category: 'health' },
+  { id: 'hea3', text: 'Se coucher sur le côté droit', category: 'health' },
+  { id: 'hea4', text: 'Consommation du miel (Santé naturelle)', category: 'health' },
+  { id: 'hea5', text: 'Faire du sport / Sortir de son milieu (Activité physique)', category: 'health' },
   
   // Spirituality
-  { id: 'spi1', text: 'I practice meditation or prayer regularly', category: 'spirituality' },
-  { id: 'spi2', text: 'I feel connected to something greater than myself', category: 'spirituality' },
-  { id: 'spi3', text: 'I have a clear sense of purpose', category: 'spirituality' },
-  { id: 'spi4', text: 'I express gratitude regularly', category: 'spirituality' },
+  { id: 'spi1', text: 'Lecture du Coran (Quotidienne)', category: 'spirituality' },
+  { id: 'spi2', text: 'Prières nocturnes (Tahajjud/Qiyam)', category: 'spirituality' },
+  { id: 'spi3', text: 'Jeûne régulier (Sunnah/Mustahabb)', category: 'spirituality' },
+  { id: 'spi4', text: 'Repentir quotidien (Istighfar)', category: 'spirituality' },
+  { id: 'spi5', text: 'Pratique de méditation (Dhikr/Tafakkur)', category: 'spirituality' },
+  { id: 'spi6', text: 'Connexion esprit-âme (Équilibre intérieur)', category: 'spirituality' },
   
   // Relationships
-  { id: 'rel1', text: 'I maintain healthy boundaries with others', category: 'relationships' },
-  { id: 'rel2', text: 'I communicate effectively with my loved ones', category: 'relationships' },
-  { id: 'rel3', text: 'I resolve conflicts peacefully', category: 'relationships' },
-  { id: 'rel4', text: 'I nurture my important relationships', category: 'relationships' },
+  { id: 'rel1', text: 'Sourire', category: 'relationships' },
+  { id: 'rel2', text: 'Offrir des cadeaux', category: 'relationships' },
+  { id: 'rel3', text: 'Empathie et générosité', category: 'relationships' },
+  { id: 'rel4', text: 'Visiter ses proches malades', category: 'relationships' },
+  { id: 'rel5', text: 'Répondre aux invitations', category: 'relationships' },
+  { id: 'rel6', text: 'Cacher les défauts des autres', category: 'relationships' },
   
   // Finances
-  { id: 'fin1', text: 'I manage my money responsibly', category: 'finances' },
-  { id: 'fin2', text: 'I save regularly for the future', category: 'finances' },
-  { id: 'fin3', text: 'I avoid unnecessary debt', category: 'finances' },
-  { id: 'fin4', text: 'I make informed financial decisions', category: 'finances' }
+  { id: 'fin1', text: 'Se lever tôt (Productivité)', category: 'finances' },
+  { id: 'fin2', text: 'Dépenser dans le bien (Charité, investissements utiles)', category: 'finances' },
+  { id: 'fin3', text: 'Être reconnaissant (Pour les biens matériels)', category: 'finances' },
+  { id: 'fin4', text: 'Invoquer contre la pauvreté (Douas spécifiques)', category: 'finances' },
+  { id: 'fin5', text: 'Protection des liens parentaux (Dépenses familiales justes)', category: 'finances' }
 ];
 
 // Create the context
@@ -216,4 +222,3 @@ export const useAssessment = () => {
   }
   return context;
 };
-

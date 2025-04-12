@@ -5,9 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import Header from '@/components/Header';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Brain, Heart, Lightbulb, Users, Coins, HelpCircle } from 'lucide-react';
 import { useAssessment, Category, questions } from '@/contexts/AssessmentContext';
 import RatingInput from '@/components/RatingInput';
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 const categoryOrder: Category[] = [
   'psychology',
@@ -18,19 +24,19 @@ const categoryOrder: Category[] = [
 ];
 
 const categoryIcons: Record<Category, React.ReactNode> = {
-  psychology: '🧠',
-  health: '❤️',
-  spirituality: '✨',
-  relationships: '👥',
-  finances: '💰'
+  psychology: <Brain className="h-6 w-6" />,
+  health: <Heart className="h-6 w-6" />,
+  spirituality: <Lightbulb className="h-6 w-6" />,
+  relationships: <Users className="h-6 w-6" />,
+  finances: <Coins className="h-6 w-6" />
 };
 
 const categoryTitles: Record<Category, string> = {
-  psychology: 'Mental Wellbeing',
-  health: 'Physical Health',
-  spirituality: 'Spiritual Growth',
-  relationships: 'Social Connections',
-  finances: 'Financial Wellness'
+  psychology: 'Psychologie',
+  health: 'Santé',
+  spirituality: 'Spiritualité',
+  relationships: 'Relations',
+  finances: 'Finances'
 };
 
 const AssessmentCategory: React.FC = () => {
@@ -84,7 +90,16 @@ const AssessmentCategory: React.FC = () => {
 
   // Determine button label
   const isLastCategory = currentIndex === categoryOrder.length - 1;
-  const nextButtonLabel = isLastCategory ? 'Complete Assessment' : 'Next';
+  const nextButtonLabel = isLastCategory ? 'Terminer l\'évaluation' : 'Suivant';
+
+  // Legend for ratings
+  const ratingLegend = [
+    { value: 1, label: "Délaissé (très faible)" },
+    { value: 2, label: "Paresse / Reprise à zéro" },
+    { value: 3, label: "Combat intérieur (efforts irréguliers)" },
+    { value: 4, label: "Effort constant" },
+    { value: 5, label: "Alhamdoulillah (excellent)" }
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -93,9 +108,9 @@ const AssessmentCategory: React.FC = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-700">
-              Step {currentIndex + 1} of {categoryOrder.length}
+              Étape {currentIndex + 1} sur {categoryOrder.length}
             </span>
-            <span className="text-sm text-gray-500">{progressValue}% complete</span>
+            <span className="text-sm text-gray-500">{progressValue}% complété</span>
           </div>
           <Progress value={progressValue} className="h-2" />
         </div>
@@ -103,11 +118,39 @@ const AssessmentCategory: React.FC = () => {
         <Card className="shadow">
           <CardHeader className="border-b border-gray-100">
             <div className="flex items-center gap-3">
-              <div className="text-3xl">{categoryIcons[currentCategory]}</div>
+              <div className="text-spirit-purple">{categoryIcons[currentCategory]}</div>
               <CardTitle className="text-xl">{categoryTitles[currentCategory]}</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="pt-6">
+            <div className="mb-4 bg-gray-50 p-3 rounded-md text-sm">
+              <div className="font-medium mb-1 flex items-center">
+                <span>Notation</span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-5 w-5 ml-1">
+                        <HelpCircle className="h-3 w-3" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <div className="space-y-1 text-xs">
+                        {ratingLegend.map(rating => (
+                          <div key={rating.value} className="flex items-center gap-1">
+                            <span className="font-bold">{rating.value}:</span> {rating.label}
+                          </div>
+                        ))}
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>Délaissé (1)</span>
+                <span>Excellent (5)</span>
+              </div>
+            </div>
+
             <div className="space-y-8">
               {categoryQuestions.map((question) => (
                 <div key={question.id} className="animate-fadeIn">
@@ -117,10 +160,6 @@ const AssessmentCategory: React.FC = () => {
                     onChange={(value) => handleRatingChange(question.id, value)}
                     max={5}
                   />
-                  <div className="flex justify-between text-sm text-gray-500 mt-1">
-                    <span>Strongly disagree</span>
-                    <span>Strongly agree</span>
-                  </div>
                 </div>
               ))}
             </div>
@@ -132,7 +171,7 @@ const AssessmentCategory: React.FC = () => {
               className="flex items-center gap-2"
             >
               <ArrowLeft size={16} />
-              Previous
+              Précédent
             </Button>
             <Button
               onClick={navigateToNextCategory}
