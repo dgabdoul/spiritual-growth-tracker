@@ -6,9 +6,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Brain, Heart, Lightbulb, Users, Coins } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useAuth } from '@/contexts/AuthContext';
 
 const PrintView: React.FC = () => {
   const [assessment, setAssessment] = useState<Assessment | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     // Load assessment from localStorage
@@ -17,10 +19,32 @@ const PrintView: React.FC = () => {
       setAssessment(JSON.parse(storedAssessment));
     }
 
+    // Add A4 portrait format styles
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @page {
+        size: A4 portrait;
+        margin: 20mm 15mm;
+      }
+      @media print {
+        body {
+          width: 210mm;
+          height: 297mm;
+          margin: 0;
+          padding: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
     // Auto-print when the component loads
     setTimeout(() => {
       window.print();
     }, 500);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
   }, []);
 
   if (!assessment) {
@@ -47,9 +71,14 @@ const PrintView: React.FC = () => {
     <div className="p-8 max-w-4xl mx-auto print:p-4">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold">Rapport d'Évaluation Spirituelle</h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-gray-600 mt-1">
           Date: {format(new Date(assessment.date), 'dd MMMM yyyy', { locale: fr })}
         </p>
+        {user && (
+          <p className="text-gray-800 mt-3">
+            <span className="font-medium">Client:</span> {user.displayName || user.email}
+          </p>
+        )}
       </div>
 
       <Card className="mb-8 print:shadow-none print:border-none">
@@ -150,6 +179,7 @@ const PrintView: React.FC = () => {
         </div>
         <p>Rapport généré le {format(new Date(), 'dd MMMM yyyy', { locale: fr })}</p>
         <p className="mt-1">www.spirittrack.com</p>
+        {user && <p className="mt-1">Préparé pour: {user.displayName || user.email}</p>}
       </div>
     </div>
   );

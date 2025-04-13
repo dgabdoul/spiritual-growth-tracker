@@ -55,6 +55,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Print route component - Less restrictive, allows non-authenticated access for sharing
+const PrintRoute = ({ children }: { children: React.ReactNode }) => {
+  return <>{children}</>;
+};
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -94,7 +99,12 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
-      <Route path="/assessment/print" element={<PrintView />} />
+      {/* Print view - accessible without login for sharing */}
+      <Route path="/assessment/print" element={
+        <PrintRoute>
+          <PrintView />
+        </PrintRoute>
+      } />
       
       {/* Admin Routes */}
       <Route path="/admin/users" element={

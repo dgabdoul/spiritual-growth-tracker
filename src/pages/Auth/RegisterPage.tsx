@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,21 +9,30 @@ import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
 
 const RegisterPage: React.FC = () => {
+  const location = useLocation();
   const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { register } = useAuth();
+  const { register, checkUserExists } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Check if we have an email from the login redirect
+    if (location.state && location.state.email) {
+      setEmail(location.state.email);
+    }
+  }, [location]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
       toast({
-        title: "Passwords do not match",
-        description: "Please ensure both passwords match.",
+        title: "Les mots de passe ne correspondent pas",
+        description: "Veuillez vous assurer que les deux mots de passe correspondent.",
         variant: "destructive",
       });
       return;
@@ -32,17 +41,30 @@ const RegisterPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      await register(email, password);
+      // Check if user already exists
+      const userExists = await checkUserExists(email);
+      
+      if (userExists) {
+        toast({
+          title: "Compte déjà existant",
+          description: "Un compte avec cette adresse email existe déjà. Veuillez vous connecter.",
+          variant: "destructive",
+        });
+        navigate('/login');
+        return;
+      }
+      
+      await register(email, password, displayName);
       toast({
-        title: "Account created!",
-        description: "Your account has been successfully created.",
+        title: "Compte créé !",
+        description: "Votre compte a été créé avec succès.",
         variant: "default",
       });
       navigate('/dashboard');
     } catch (error) {
       toast({
-        title: "Registration failed",
-        description: "There was an error creating your account.",
+        title: "Échec de l'inscription",
+        description: "Une erreur est survenue lors de la création de votre compte.",
         variant: "destructive",
       });
       console.error('Registration error:', error);
@@ -57,9 +79,9 @@ const RegisterPage: React.FC = () => {
       <div className="max-w-md mx-auto py-16 px-4 sm:px-6 lg:px-8">
         <Card className="shadow-lg">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center font-bold">Create an account</CardTitle>
+            <CardTitle className="text-2xl text-center font-bold">Créer un compte</CardTitle>
             <CardDescription className="text-center">
-              Enter your details to create your account
+              Saisissez vos informations pour créer votre compte
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
@@ -72,7 +94,7 @@ const RegisterPage: React.FC = () => {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder="vous@exemple.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -80,8 +102,22 @@ const RegisterPage: React.FC = () => {
                   />
                 </div>
                 <div className="grid gap-2">
+                  <label htmlFor="displayName" className="text-sm font-medium leading-none">
+                    Nom et prénom
+                  </label>
+                  <Input
+                    id="displayName"
+                    type="text"
+                    placeholder="Jean Dupont"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    required
+                    className="bg-white"
+                  />
+                </div>
+                <div className="grid gap-2">
                   <label htmlFor="password" className="text-sm font-medium leading-none">
-                    Password
+                    Mot de passe
                   </label>
                   <Input
                     id="password"
@@ -94,7 +130,7 @@ const RegisterPage: React.FC = () => {
                 </div>
                 <div className="grid gap-2">
                   <label htmlFor="confirmPassword" className="text-sm font-medium leading-none">
-                    Confirm Password
+                    Confirmer le mot de passe
                   </label>
                   <Input
                     id="confirmPassword"
@@ -110,16 +146,16 @@ const RegisterPage: React.FC = () => {
                   className="w-full bg-spirit-purple hover:bg-spirit-deep-purple"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? 'Creating account...' : 'Create account'}
+                  {isSubmitting ? 'Création en cours...' : 'Créer un compte'}
                 </Button>
               </div>
             </form>
           </CardContent>
           <CardFooter className="flex flex-col">
             <div className="text-sm text-center text-gray-500">
-              Already have an account?{' '}
+              Vous avez déjà un compte ?{' '}
               <Link to="/login" className="text-spirit-purple hover:text-spirit-deep-purple font-medium">
-                Sign in
+                Se connecter
               </Link>
             </div>
           </CardFooter>
