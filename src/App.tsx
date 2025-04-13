@@ -19,14 +19,33 @@ import AssessmentHistory from "./pages/Assessment/AssessmentHistory";
 import PrintView from "./pages/Assessment/PrintView";
 import NotFound from "./pages/NotFound";
 
+// Admin Pages
+import UsersManagement from "./pages/Admin/UsersManagement";
+import Statistics from "./pages/Admin/Statistics";
+
 const queryClient = new QueryClient();
+
+// Admin route component
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return <div className="h-screen flex items-center justify-center">Chargement...</div>;
+  }
+  
+  if (!user || user.email !== "admin@example.com") {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return <>{children}</>;
+};
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
   
   if (isLoading) {
-    return <div className="h-screen flex items-center justify-center">Loading...</div>;
+    return <div className="h-screen flex items-center justify-center">Chargement...</div>;
   }
   
   if (!user) {
@@ -76,6 +95,19 @@ const AppRoutes = () => {
       } />
       
       <Route path="/assessment/print" element={<PrintView />} />
+      
+      {/* Admin Routes */}
+      <Route path="/admin/users" element={
+        <AdminRoute>
+          <UsersManagement />
+        </AdminRoute>
+      } />
+      
+      <Route path="/admin/statistics" element={
+        <AdminRoute>
+          <Statistics />
+        </AdminRoute>
+      } />
       
       {/* Catch all */}
       <Route path="*" element={<NotFound />} />
