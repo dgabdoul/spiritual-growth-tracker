@@ -1,15 +1,24 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Header from '@/components/Header';
 import { Brain, Heart, Lightbulb, Users, Coins } from 'lucide-react';
 import { useAssessment, questions } from '@/contexts/AssessmentContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const AssessmentStart: React.FC = () => {
   const { startNewAssessment } = useAssessment();
+  const { user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Verify if user is logged in
+    if (!user) {
+      navigate('/login');
+    }
+  }, [user, navigate]);
 
   // Count questions for each category
   const psychologyQuestions = questions.filter(q => q.category === 'psychology').length;
@@ -22,6 +31,17 @@ const AssessmentStart: React.FC = () => {
     startNewAssessment();
     navigate('/assessment/psychology');
   };
+
+  // If no user is found, show a loading state while redirect happens
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-500">Vérification de votre compte...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
