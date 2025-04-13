@@ -2,147 +2,227 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Heart, Brain, Lightbulb, Users, Coins } from 'lucide-react';
+import { ArrowRight, Brain, Heart, Lightbulb, Users, Coins, CheckCircle2, BarChart2 } from 'lucide-react';
 import Header from '@/components/Header';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { Card, CardContent } from "@/components/ui/card";
+
+const testimonials = [
+  {
+    name: "Thomas L.",
+    text: "SpiritTrack m'a permis de prendre conscience de mes points forts et faibles dans tous les aspects de ma vie.",
+    role: "Entrepreneur"
+  },
+  {
+    name: "Marie K.",
+    text: "Un outil précieux pour suivre mon évolution personnelle et spirituelle mois après mois.",
+    role: "Coach de vie"
+  },
+  {
+    name: "Jean D.",
+    text: "Je recommande vivement cette plateforme à tous ceux qui cherchent à s'améliorer de façon globale.",
+    role: "Thérapeute"
+  }
+];
+
+const features = [
+  {
+    title: "Évaluations complètes",
+    description: "Analysez votre progression dans 5 dimensions essentielles de la vie",
+    icon: <BarChart2 className="h-8 w-8 text-spirit-purple" />
+  },
+  {
+    title: "Visualisation intuitive",
+    description: "Graphiques clairs pour visualiser votre progression au fil du temps",
+    icon: <Lightbulb className="h-8 w-8 text-spirit-purple" />
+  },
+  {
+    title: "Recommandations personnalisées",
+    description: "Conseils adaptés à votre profil et à vos résultats",
+    icon: <Brain className="h-8 w-8 text-spirit-purple" />
+  },
+  {
+    title: "Rapports détaillés",
+    description: "Exportez et partagez vos résultats facilement",
+    icon: <CheckCircle2 className="h-8 w-8 text-spirit-purple" />
+  }
+];
 
 const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       
-      {/* Hero Section */}
-      <section className="bg-gradient-to-b from-white to-spirit-soft-purple py-20 px-6 flex-1">
-        <div className="max-w-5xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-gradient">
-            Track Your Spiritual Growth Journey
-          </h1>
-          <p className="text-lg md:text-xl text-gray-700 mb-10 max-w-3xl mx-auto">
-            Monitor your progress across 5 key life dimensions: Psychology, Health, Spirituality, Relationships, and Finances.
+      {/* Hero Section - Modern and Clean */}
+      <section className="relative bg-white py-16 md:py-24 px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6 md:space-y-8">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-gray-900">
+              Suivez votre <span className="text-gradient">progression spirituelle</span> en toute simplicité
+            </h1>
+            <p className="text-lg text-gray-600 max-w-md">
+              Évaluez votre croissance personnelle dans 5 dimensions clés et recevez des recommandations adaptées à votre parcours.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link to="/register">
+                <Button size="lg" className="bg-spirit-purple hover:bg-spirit-deep-purple text-white">
+                  Commencer gratuitement <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+              <Link to="/login">
+                <Button variant="outline" size="lg">
+                  Se connecter
+                </Button>
+              </Link>
+            </div>
+          </div>
+          <div className="relative rounded-xl overflow-hidden shadow-2xl">
+            <img 
+              src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cGVyc29uYWwlMjBkZXZlbG9wbWVudHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=80" 
+              alt="Spiritual Growth Dashboard" 
+              className="w-full h-auto object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-tr from-spirit-purple/30 to-transparent mix-blend-overlay"></div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Features Section - Grid Layout */}
+      <section className="py-16 px-6 bg-gray-50">
+        <div className="max-w-7xl mx-auto text-center mb-12">
+          <h2 className="text-3xl font-bold mb-4 text-gradient">Fonctionnalités principales</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Notre plateforme vous offre tous les outils nécessaires pour suivre votre progression spirituelle et personnelle.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/register">
-              <Button size="lg" className="bg-spirit-purple hover:bg-spirit-deep-purple text-white">
-                Start Your Journey
-              </Button>
-            </Link>
-            <Link to="/login">
-              <Button variant="outline" size="lg">
-                Sign In
-              </Button>
-            </Link>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+          {features.map((feature, index) => (
+            <div key={index} className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+              <div className="flex justify-center mb-4">
+                {feature.icon}
+              </div>
+              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+              <p className="text-gray-600">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+      
+      {/* Dimensions Section */}
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4 text-gradient">Les cinq dimensions de croissance</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Nous évaluons votre progression dans cinq aspects fondamentaux de la vie pour une approche holistique.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            <DimensionCard icon={<Brain className="h-12 w-12" />} title="Psychologie" color="bg-blue-50" textColor="text-blue-700" />
+            <DimensionCard icon={<Heart className="h-12 w-12" />} title="Santé" color="bg-green-50" textColor="text-green-700" />
+            <DimensionCard icon={<Lightbulb className="h-12 w-12" />} title="Spiritualité" color="bg-purple-50" textColor="text-spirit-purple" />
+            <DimensionCard icon={<Users className="h-12 w-12" />} title="Relations" color="bg-amber-50" textColor="text-amber-700" />
+            <DimensionCard icon={<Coins className="h-12 w-12" />} title="Finances" color="bg-emerald-50" textColor="text-emerald-700" />
           </div>
         </div>
       </section>
       
-      {/* Features Section */}
-      <section className="py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12 text-gradient">Holistic Growth Tracking</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {/* Feature 1 */}
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-spirit-soft-purple p-4 rounded-full mb-4">
-                <Lightbulb className="text-spirit-deep-purple h-8 w-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Track Your Progress</h3>
-              <p className="text-gray-600">
-                Monitor your growth with intuitive assessments and beautiful visualizations.
-              </p>
-            </div>
-            
-            {/* Feature 2 */}
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-spirit-soft-purple p-4 rounded-full mb-4">
-                <Brain className="text-spirit-deep-purple h-8 w-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Get Personalized Insights</h3>
-              <p className="text-gray-600">
-                Receive tailored recommendations based on your assessment results.
-              </p>
-            </div>
-            
-            {/* Feature 3 */}
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-spirit-soft-purple p-4 rounded-full mb-4">
-                <Heart className="text-spirit-deep-purple h-8 w-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Holistic Growth</h3>
-              <p className="text-gray-600">
-                Balance all aspects of your life: mental, physical, spiritual, social, and financial.
-              </p>
-            </div>
+      {/* Testimonials Carousel */}
+      <section className="py-16 px-6 bg-gray-50">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4 text-gradient">Ce que disent nos utilisateurs</h2>
+            <p className="text-gray-600">Découvrez les expériences de personnes qui ont transformé leur vie avec SpiritTrack</p>
           </div>
-        </div>
-      </section>
-      
-      {/* Categories Section */}
-      <section className="bg-gray-50 py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12 text-gradient">The Five Dimensions</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-            <div className="bg-white p-6 rounded-lg shadow-sm flex flex-col items-center text-center">
-              <Brain className="text-spirit-purple h-10 w-10 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Psychology</h3>
-              <p className="text-gray-600 text-sm">Emotional well-being and mental health</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-sm flex flex-col items-center text-center">
-              <Heart className="text-spirit-purple h-10 w-10 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Health</h3>
-              <p className="text-gray-600 text-sm">Physical vitality and wellness</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-sm flex flex-col items-center text-center">
-              <Lightbulb className="text-spirit-purple h-10 w-10 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Spirituality</h3>
-              <p className="text-gray-600 text-sm">Connection to deeper values and purpose</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-sm flex flex-col items-center text-center">
-              <Users className="text-spirit-purple h-10 w-10 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Relationships</h3>
-              <p className="text-gray-600 text-sm">Quality of personal connections</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-sm flex flex-col items-center text-center">
-              <Coins className="text-spirit-purple h-10 w-10 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Finances</h3>
-              <p className="text-gray-600 text-sm">Prosperity and material stability</p>
-            </div>
-          </div>
+          <Carousel className="mx-auto">
+            <CarouselContent>
+              {testimonials.map((testimonial, index) => (
+                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                  <Card className="border-none shadow-md">
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        <p className="text-gray-600 italic">"{testimonial.text}"</p>
+                        <div className="font-medium">
+                          <p className="text-spirit-purple">{testimonial.name}</p>
+                          <p className="text-gray-500 text-sm">{testimonial.role}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-0" />
+            <CarouselNext className="right-0" />
+          </Carousel>
         </div>
       </section>
       
       {/* CTA Section */}
       <section className="py-20 px-6 bg-gradient-to-r from-spirit-purple to-spirit-deep-purple text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to Begin Your Journey?</h2>
-          <p className="text-lg mb-10 opacity-90">
-            Create your account today and take the first step toward holistic growth and self-improvement.
+          <h2 className="text-3xl font-bold mb-6">Prêt à commencer votre parcours ?</h2>
+          <p className="text-lg mb-8 opacity-90">
+            Créez votre compte aujourd'hui et prenez le contrôle de votre croissance personnelle et spirituelle.
           </p>
           <Link to="/register">
             <Button size="lg" variant="secondary" className="bg-white text-spirit-deep-purple hover:bg-gray-100">
-              Start Now
+              Commencer maintenant <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
         </div>
       </section>
       
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-10 px-6">
+      <footer className="bg-gray-900 text-gray-300 py-12 px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-6 md:mb-0">
-              <h2 className="text-2xl font-bold text-white">SpiritTrack</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <h3 className="text-2xl font-bold text-white mb-4">SpiritTrack</h3>
+              <p className="text-gray-400 mb-6">
+                Votre partenaire pour une croissance holistique et spirituelle équilibrée.
+              </p>
             </div>
-            <div className="text-sm text-gray-400">
-              &copy; {new Date().getFullYear()} SpiritTrack. All rights reserved.
+            <div>
+              <h4 className="text-xl font-bold text-white mb-4">Liens utiles</h4>
+              <ul className="space-y-2">
+                <li><Link to="/about" className="text-gray-400 hover:text-white transition-colors">À propos</Link></li>
+                <li><Link to="/contact" className="text-gray-400 hover:text-white transition-colors">Contact</Link></li>
+                <li><Link to="/faq" className="text-gray-400 hover:text-white transition-colors">FAQ</Link></li>
+              </ul>
             </div>
+            <div>
+              <h4 className="text-xl font-bold text-white mb-4">Légal</h4>
+              <ul className="space-y-2">
+                <li><Link to="/terms" className="text-gray-400 hover:text-white transition-colors">Conditions d'utilisation</Link></li>
+                <li><Link to="/privacy" className="text-gray-400 hover:text-white transition-colors">Politique de confidentialité</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
+            &copy; {new Date().getFullYear()} SpiritTrack. Tous droits réservés.
           </div>
         </div>
       </footer>
+    </div>
+  );
+};
+
+// Dimension Card Component
+const DimensionCard = ({ icon, title, color, textColor }: { icon: React.ReactNode; title: string; color: string; textColor: string }) => {
+  return (
+    <div className={`${color} rounded-xl p-6 text-center h-full flex flex-col items-center justify-center transition-transform hover:scale-105`}>
+      <div className={`${textColor} mb-4`}>{icon}</div>
+      <h3 className={`text-xl font-semibold ${textColor}`}>{title}</h3>
     </div>
   );
 };
