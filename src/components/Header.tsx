@@ -12,7 +12,7 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { cn } from '@/lib/utils';
-import { LogOut, User, BarChart3, Users, Settings } from 'lucide-react';
+import { LogOut, User, BarChart3, Users, Settings, HelpCircle } from 'lucide-react';
 
 const Header = () => {
   const { user, logout } = useAuth();
@@ -54,6 +54,9 @@ const Header = () => {
                       <ListItem to="/assessment/history" title="Historique" icon={<BarChart3 className="h-4 w-4 mr-2" />}>
                         Consultez vos évaluations passées
                       </ListItem>
+                      <ListItem to="/support" title="Support" icon={<HelpCircle className="h-4 w-4 mr-2" />}>
+                        Contactez notre équipe de support technique
+                      </ListItem>
                       {user.email === "admin@example.com" && (
                         <ListItem to="/admin" title="Administration" icon={<Settings className="h-4 w-4 mr-2" />}>
                           Accédez aux outils d'administration
@@ -93,6 +96,13 @@ const Header = () => {
                 Nouvelle Évaluation
               </Button>
             </Link>
+
+            <Link to="/support">
+              <Button variant="outline">
+                <HelpCircle size={18} className="mr-2" />
+                Support
+              </Button>
+            </Link>
             
             <Button variant="ghost" onClick={() => logout()} className="text-gray-600">
               <LogOut size={18} />
@@ -101,6 +111,12 @@ const Header = () => {
           </div>
         ) : (
           <div className="flex items-center gap-4">
+            <Link to="/support">
+              <Button variant="outline">
+                <HelpCircle size={18} className="mr-2" />
+                Support
+              </Button>
+            </Link>
             <Link to="/login">
               <Button variant="ghost">Connexion</Button>
             </Link>

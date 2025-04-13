@@ -18,6 +18,7 @@ import AssessmentResults from "./pages/Assessment/AssessmentResults";
 import AssessmentHistory from "./pages/Assessment/AssessmentHistory";
 import PrintView from "./pages/Assessment/PrintView";
 import NotFound from "./pages/NotFound";
+import SupportContactPage from "./pages/SupportContactPage";
 
 // Admin Pages
 import UsersManagement from "./pages/Admin/UsersManagement";
@@ -67,6 +68,7 @@ const AppRoutes = () => {
       <Route path="/landing" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/support" element={<SupportContactPage />} />
       
       {/* Protected Routes */}
       <Route path="/dashboard" element={
