@@ -18,7 +18,7 @@ const AboutPage: React.FC = () => {
               À propos de <span className="text-gradient">SpiritTrack</span>
             </h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Découvrez notre mission, notre vision et notre équipe dédiée à votre développement spirituel et personnel.
+              Découvrez notre mission, notre vision et nos valeurs dédiées à votre développement spirituel et personnel.
             </p>
           </div>
         </div>
@@ -61,59 +61,61 @@ const AboutPage: React.FC = () => {
               icon={<Brain className="h-10 w-10 text-spirit-purple" />}
               title="Intégrité scientifique" 
               description="Nos évaluations et recommandations sont basées sur des recherches scientifiques rigoureuses et des méthodologies éprouvées."
+              quoteType="Coran"
+              quote="Dis : Sont-ils égaux, ceux qui savent et ceux qui ne savent pas ? Seules les personnes douées d'intelligence réfléchissent."
+              quoteSource="Sourate Az-Zumar, verset 9"
+              hadith="Quiconque suit un chemin à la recherche de la connaissance, Allah lui facilitera un chemin vers le Paradis."
+              hadithSource="Rapporté par Muslim"
             />
             <ValueCard 
               icon={<Heart className="h-10 w-10 text-spirit-purple" />}
               title="Bienveillance" 
               description="Nous abordons chaque parcours avec empathie et sans jugement, reconnaissant l'unicité de chaque individu."
+              quoteType="Coran"
+              quote="Et par miséricorde de la part d'Allah, tu as été doux envers eux. Si tu avais été rude et dur de cœur, ils se seraient enfuis de ton entourage."
+              quoteSource="Sourate Al-Imran, verset 159"
+              hadith="Les croyants, dans leur affection, leur miséricorde et leur sympathie les uns envers les autres, sont comme un seul corps : si un membre souffre, tout le corps partage sa souffrance, sa fièvre et son insomnie."
+              hadithSource="Rapporté par Al-Bukhari et Muslim"
             />
             <ValueCard 
               icon={<Users className="h-10 w-10 text-spirit-purple" />}
               title="Communauté" 
               description="Nous croyons au pouvoir du soutien mutuel et de l'apprentissage collectif pour une croissance durable."
+              quoteType="Coran"
+              quote="Entraidez-vous dans l'accomplissement des bonnes œuvres et de la piété et ne vous entraidez pas dans le péché et la transgression."
+              quoteSource="Sourate Al-Maidah, verset 2"
+              hadith="Le croyant est au croyant comme les parties d'un édifice qui se renforcent les unes les autres."
+              hadithSource="Rapporté par Al-Bukhari et Muslim"
             />
             <ValueCard 
               icon={<BookOpen className="h-10 w-10 text-spirit-purple" />}
               title="Apprentissage continu" 
               description="Nous nous engageons à améliorer constamment nos connaissances et nos outils pour mieux vous servir."
+              quoteType="Coran"
+              quote="Ô mon Seigneur, accrois-moi en science."
+              quoteSource="Sourate Ta-Ha, verset 114"
+              hadith="La recherche du savoir est une obligation pour tout musulman."
+              hadithSource="Rapporté par Ibn Majah"
             />
             <ValueCard 
               icon={<Lightbulb className="h-10 w-10 text-spirit-purple" />}
               title="Innovation" 
               description="Nous explorons sans cesse de nouvelles approches pour vous offrir la meilleure expérience possible."
+              quoteType="Coran"
+              quote="En vérité, dans la création des cieux et de la terre, et dans l'alternance de la nuit et du jour, il y a certes des signes pour les doués d'intelligence."
+              quoteSource="Sourate Al-Imran, verset 190"
+              hadith="Celui qui introduit une bonne pratique en Islam reçoit sa récompense et celle de tous ceux qui la suivent après lui, sans que leur récompense ne soit diminuée."
+              hadithSource="Rapporté par Muslim"
             />
             <ValueCard 
               icon={<ScrollText className="h-10 w-10 text-spirit-purple" />}
               title="Transparence" 
               description="Nous communiquons clairement sur nos méthodes, nos sources et nos résultats pour établir une relation de confiance."
-            />
-          </div>
-        </div>
-      </section>
-      
-      {/* Our Team */}
-      <section className="py-12 px-6 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold mb-12 text-center text-gradient">Notre équipe</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <TeamMember 
-              name="Thomas Laurent" 
-              role="Fondateur & Psychologue"
-              image="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80"
-              description="Psychologue clinicien avec plus de 15 ans d'expérience, Thomas a fondé SpiritTrack pour répondre à un besoin qu'il observait chez ses patients : disposer d'outils d'auto-évaluation fiables."
-            />
-            <TeamMember 
-              name="Marie Dubois" 
-              role="Experte en Développement Personnel"
-              image="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80"
-              description="Coach certifiée et auteure de plusieurs livres sur le développement personnel, Marie apporte son expertise pour créer des parcours d'évaluation pertinents et impactants."
-            />
-            <TeamMember 
-              name="Jean Moreau" 
-              role="Responsable Technique"
-              image="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80"
-              description="Expert en technologie avec une passion pour les applications au service du bien-être, Jean supervise le développement technique de la plateforme."
+              quoteType="Coran"
+              quote="Ô vous qui croyez! Craignez Allah et soyez avec les véridiques."
+              quoteSource="Sourate At-Tawbah, verset 119"
+              hadith="La véracité mène à la piété et la piété mène au Paradis. Et l'homme ne cesse d'être véridique jusqu'à ce qu'il soit inscrit auprès d'Allah comme très véridique."
+              hadithSource="Rapporté par Al-Bukhari et Muslim"
             />
           </div>
         </div>
@@ -176,31 +178,41 @@ const AboutPage: React.FC = () => {
   );
 };
 
-// Value Card Component
-const ValueCard = ({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) => {
+// Value Card Component with Quran verse and hadith
+const ValueCard = ({ 
+  icon, 
+  title, 
+  description, 
+  quoteType, 
+  quote, 
+  quoteSource, 
+  hadith, 
+  hadithSource 
+}: { 
+  icon: React.ReactNode; 
+  title: string; 
+  description: string;
+  quoteType: string;
+  quote: string;
+  quoteSource: string;
+  hadith: string;
+  hadithSource: string;
+}) => {
   return (
     <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all border border-gray-100">
       <div className="mb-4">{icon}</div>
       <h3 className="text-xl font-semibold mb-3">{title}</h3>
-      <p className="text-gray-600">{description}</p>
-    </div>
-  );
-};
-
-// Team Member Component
-const TeamMember = ({ name, role, image, description }: { name: string; role: string; image: string; description: string }) => {
-  return (
-    <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all border border-gray-100">
-      <div className="flex flex-col items-center mb-4">
-        <img 
-          src={image} 
-          alt={name} 
-          className="w-24 h-24 rounded-full object-cover mb-4"
-        />
-        <h3 className="text-xl font-semibold">{name}</h3>
-        <p className="text-spirit-purple font-medium">{role}</p>
+      <p className="text-gray-600 mb-4">{description}</p>
+      <div className="border-t border-gray-100 pt-4 mt-3">
+        <div className="mb-3">
+          <p className="italic text-gray-600 text-sm">&ldquo;{quote}&rdquo;</p>
+          <p className="text-spirit-purple text-xs font-medium mt-1">{quoteSource}</p>
+        </div>
+        <div>
+          <p className="italic text-gray-600 text-sm">&ldquo;{hadith}&rdquo;</p>
+          <p className="text-spirit-purple text-xs font-medium mt-1">{hadithSource}</p>
+        </div>
       </div>
-      <p className="text-gray-600 text-center">{description}</p>
     </div>
   );
 };
