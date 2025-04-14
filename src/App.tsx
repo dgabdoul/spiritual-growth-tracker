@@ -11,6 +11,8 @@ import { AssessmentProvider } from "./contexts/AssessmentContext";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/Auth/LoginPage";
 import RegisterPage from "./pages/Auth/RegisterPage";
+import ForgotPasswordPage from "./pages/Auth/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/Auth/ResetPasswordPage";
 import Dashboard from "./pages/Dashboard";
 import AssessmentStart from "./pages/Assessment/AssessmentStart";
 import AssessmentCategory from "./pages/Assessment/AssessmentCategory";
@@ -26,6 +28,21 @@ import Statistics from "./pages/Admin/Statistics";
 
 const queryClient = new QueryClient();
 
+// Index route component - Redirects based on authentication status
+const IndexRoute = () => {
+  const { user, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return <div className="h-screen flex items-center justify-center">Chargement...</div>;
+  }
+  
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return <Navigate to="/register" replace />;
+};
+
 // Admin route component
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
@@ -35,7 +52,7 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   if (!user || user.email !== "admin@example.com") {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/login" replace />;
   }
   
   return <>{children}</>;
@@ -64,10 +81,12 @@ const PrintRoute = ({ children }: { children: React.ReactNode }) => {
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
+      <Route path="/" element={<IndexRoute />} />
       <Route path="/landing" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
       <Route path="/support" element={<SupportContactPage />} />
       
       {/* Protected Routes */}

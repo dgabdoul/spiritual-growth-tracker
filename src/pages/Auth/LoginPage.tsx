@@ -1,23 +1,68 @@
 
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const { login, checkUserExists } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  useEffect(() => {
+    // Check if we have a success message from password reset
+    const params = new URLSearchParams(location.search);
+    const message = params.get('message');
+    
+    if (message === 'password_reset') {
+      toast({
+        title: "Mot de passe réinitialisé",
+        description: "Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.",
+        variant: "default",
+      });
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location, toast, navigate]);
+
+  const validateForm = () => {
+    const newErrors: { email?: string; password?: string } = {};
+    let isValid = true;
+
+    if (!email.trim()) {
+      newErrors.email = "L'email est requis";
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = "Format d'email invalide";
+      isValid = false;
+    }
+
+    if (!password) {
+      newErrors.password = "Le mot de passe est requis";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsSubmitting(true);
 
     try {
@@ -46,7 +91,7 @@ const LoginPage: React.FC = () => {
     } catch (error) {
       toast({
         title: "Échec de connexion",
-        description: "Veuillez vérifier vos identifiants et réessayer.",
+        description: error instanceof Error ? error.message : "Veuillez vérifier vos identifiants et réessayer.",
         variant: "destructive",
       });
       console.error('Login error:', error);
@@ -79,24 +124,31 @@ const LoginPage: React.FC = () => {
                     placeholder="vous@exemple.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="bg-white"
+                    className={`bg-white ${errors.email ? "border-red-500" : ""}`}
                   />
+                  {errors.email && (
+                    <p className="text-sm text-red-500">{errors.email}</p>
+                  )}
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
                     <label htmlFor="password" className="text-sm font-medium leading-none">
                       Mot de passe
                     </label>
+                    <Link to="/forgot-password" className="text-xs text-spirit-purple hover:text-spirit-deep-purple">
+                      Mot de passe oublié ?
+                    </Link>
                   </div>
                   <Input
                     id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="bg-white"
+                    className={`bg-white ${errors.password ? "border-red-500" : ""}`}
                   />
+                  {errors.password && (
+                    <p className="text-sm text-red-500">{errors.password}</p>
+                  )}
                 </div>
                 <Button
                   type="submit"

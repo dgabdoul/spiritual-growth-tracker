@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from 'lucide-react';
 
 const RegisterPage: React.FC = () => {
   const location = useLocation();
@@ -15,7 +17,13 @@ const RegisterPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { register, checkUserExists } = useAuth();
+  const [errors, setErrors] = useState<{
+    email?: string;
+    displayName?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
+  const { register, checkUserExists, validatePassword } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -26,15 +34,56 @@ const RegisterPage: React.FC = () => {
     }
   }, [location]);
 
+  const validateForm = () => {
+    const newErrors: {
+      email?: string;
+      displayName?: string;
+      password?: string;
+      confirmPassword?: string;
+    } = {};
+    let isValid = true;
+
+    // Email validation
+    if (!email.trim()) {
+      newErrors.email = "L'email est requis";
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = "Format d'email invalide";
+      isValid = false;
+    }
+
+    // Display name validation
+    if (!displayName.trim()) {
+      newErrors.displayName = "Le nom est requis";
+      isValid = false;
+    }
+
+    // Password validation
+    if (!password) {
+      newErrors.password = "Le mot de passe est requis";
+      isValid = false;
+    } else {
+      const passwordValidation = validatePassword(password);
+      if (!passwordValidation.isValid) {
+        newErrors.password = passwordValidation.message;
+        isValid = false;
+      }
+    }
+
+    // Confirm password
+    if (password !== confirmPassword) {
+      newErrors.confirmPassword = "Les mots de passe ne correspondent pas";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (password !== confirmPassword) {
-      toast({
-        title: "Les mots de passe ne correspondent pas",
-        description: "Veuillez vous assurer que les deux mots de passe correspondent.",
-        variant: "destructive",
-      });
+    if (!validateForm()) {
       return;
     }
     
@@ -64,7 +113,7 @@ const RegisterPage: React.FC = () => {
     } catch (error) {
       toast({
         title: "Échec de l'inscription",
-        description: "Une erreur est survenue lors de la création de votre compte.",
+        description: error instanceof Error ? error.message : "Une erreur est survenue lors de la création de votre compte.",
         variant: "destructive",
       });
       console.error('Registration error:', error);
@@ -97,9 +146,11 @@ const RegisterPage: React.FC = () => {
                     placeholder="vous@exemple.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="bg-white"
+                    className={`bg-white ${errors.email ? "border-red-500" : ""}`}
                   />
+                  {errors.email && (
+                    <p className="text-sm text-red-500">{errors.email}</p>
+                  )}
                 </div>
                 <div className="grid gap-2">
                   <label htmlFor="displayName" className="text-sm font-medium leading-none">
@@ -111,9 +162,11 @@ const RegisterPage: React.FC = () => {
                     placeholder="Jean Dupont"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    required
-                    className="bg-white"
+                    className={`bg-white ${errors.displayName ? "border-red-500" : ""}`}
                   />
+                  {errors.displayName && (
+                    <p className="text-sm text-red-500">{errors.displayName}</p>
+                  )}
                 </div>
                 <div className="grid gap-2">
                   <label htmlFor="password" className="text-sm font-medium leading-none">
@@ -124,9 +177,15 @@ const RegisterPage: React.FC = () => {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="bg-white"
+                    className={`bg-white ${errors.password ? "border-red-500" : ""}`}
                   />
+                  {errors.password && (
+                    <p className="text-sm text-red-500">{errors.password}</p>
+                  )}
+                  <p className="text-xs text-gray-500">
+                    Le mot de passe doit contenir au minimum 8 caractères, une majuscule, 
+                    un chiffre et un caractère spécial
+                  </p>
                 </div>
                 <div className="grid gap-2">
                   <label htmlFor="confirmPassword" className="text-sm font-medium leading-none">
@@ -137,9 +196,11 @@ const RegisterPage: React.FC = () => {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    className="bg-white"
+                    className={`bg-white ${errors.confirmPassword ? "border-red-500" : ""}`}
                   />
+                  {errors.confirmPassword && (
+                    <p className="text-sm text-red-500">{errors.confirmPassword}</p>
+                  )}
                 </div>
                 <Button
                   type="submit"
