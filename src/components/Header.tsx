@@ -12,7 +12,7 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { cn } from '@/lib/utils';
-import { LogOut, User, BarChart3, Users, Settings, HelpCircle } from 'lucide-react';
+import { LogOut, User, BarChart3, Users, Settings, HelpCircle, Info, Home } from 'lucide-react';
 
 const Header = () => {
   const { user, logout } = useAuth();
@@ -65,6 +65,27 @@ const Header = () => {
                     </ul>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="bg-transparent hover:bg-gray-50">Informations</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[400px] gap-3 p-4">
+                      <ListItem
+                        to="/landing"
+                        title="Accueil"
+                        icon={<Home className="h-4 w-4 mr-2" />}
+                      >
+                        Découvrez notre plateforme et nos services
+                      </ListItem>
+                      <ListItem
+                        to="/about"
+                        title="À propos"
+                        icon={<Info className="h-4 w-4 mr-2" />}
+                      >
+                        En savoir plus sur notre mission et notre équipe
+                      </ListItem>
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
                 {user.email === "admin@example.com" && (
                   <NavigationMenuItem>
                     <NavigationMenuTrigger className="bg-transparent hover:bg-gray-50">Administration</NavigationMenuTrigger>
@@ -111,6 +132,18 @@ const Header = () => {
           </div>
         ) : (
           <div className="flex items-center gap-4">
+            <Link to="/landing">
+              <Button variant="ghost">
+                <Home size={18} className="mr-2" />
+                Accueil
+              </Button>
+            </Link>
+            <Link to="/about">
+              <Button variant="ghost">
+                <Info size={18} className="mr-2" />
+                À propos
+              </Button>
+            </Link>
             <Link to="/support">
               <Button variant="outline">
                 <HelpCircle size={18} className="mr-2" />

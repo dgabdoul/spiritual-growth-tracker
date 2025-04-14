@@ -9,6 +9,7 @@ import { AssessmentProvider } from "./contexts/AssessmentContext";
 
 // Pages
 import LandingPage from "./pages/LandingPage";
+import AboutPage from "./pages/AboutPage";
 import LoginPage from "./pages/Auth/LoginPage";
 import RegisterPage from "./pages/Auth/RegisterPage";
 import ForgotPasswordPage from "./pages/Auth/ForgotPasswordPage";
@@ -83,6 +84,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<IndexRoute />} />
       <Route path="/landing" element={<LandingPage />} />
+      <Route path="/about" element={<AboutPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
