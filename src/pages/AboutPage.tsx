@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
-import { Lightbulb, Heart, Users, BookOpen, ScrollText, Brain } from 'lucide-react';
+import { BookOpen, Heart, Users, ScrollText, Star, Compass } from 'lucide-react';
 
 const AboutPage: React.FC = () => {
   return (
@@ -42,7 +42,7 @@ const AboutPage: React.FC = () => {
             </div>
             <div className="relative rounded-xl overflow-hidden shadow-lg">
               <img 
-                src="https://images.unsplash.com/photo-1501139083538-0139c4722333?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHNwaXJpdHVhbGl0eXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=80" 
+                src="https://img.freepik.com/vecteurs-libre/fond-conception-lanternes-islamiques-aquarelles_23-2149374210.jpg" 
                 alt="Notre mission" 
                 className="w-full h-auto object-cover"
               />
@@ -58,7 +58,7 @@ const AboutPage: React.FC = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <ValueCard 
-              icon={<Brain className="h-10 w-10 text-spirit-purple" />}
+              icon={<Compass className="h-10 w-10 text-spirit-purple" />}
               title="Intégrité scientifique" 
               description="Nos évaluations et recommandations sont basées sur des recherches scientifiques rigoureuses et des méthodologies éprouvées."
               quoteType="Coran"
@@ -98,7 +98,7 @@ const AboutPage: React.FC = () => {
               hadithSource="Rapporté par Ibn Majah"
             />
             <ValueCard 
-              icon={<Lightbulb className="h-10 w-10 text-spirit-purple" />}
+              icon={<Star className="h-10 w-10 text-spirit-purple" />}
               title="Innovation" 
               description="Nous explorons sans cesse de nouvelles approches pour vous offrir la meilleure expérience possible."
               quoteType="Coran"

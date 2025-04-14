@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Brain, Heart, Lightbulb, Users, Coins, CheckCircle2, BarChart2 } from 'lucide-react';
+import { ArrowRight, BookOpen, Heart, Star, Users, Coins, CheckCircle2, Compass } from 'lucide-react';
 import Header from '@/components/Header';
 import {
   Carousel,
@@ -35,22 +35,22 @@ const features = [
   {
     title: "Évaluations complètes",
     description: "Analysez votre progression dans 5 dimensions essentielles de la vie",
-    icon: <BarChart2 className="h-8 w-8 text-spirit-purple" />
+    icon: <CheckCircle2 className="h-8 w-8 text-spirit-purple" />
   },
   {
     title: "Visualisation intuitive",
     description: "Graphiques clairs pour visualiser votre progression au fil du temps",
-    icon: <Lightbulb className="h-8 w-8 text-spirit-purple" />
+    icon: <Star className="h-8 w-8 text-spirit-purple" />
   },
   {
     title: "Recommandations personnalisées",
     description: "Conseils adaptés à votre profil et à vos résultats",
-    icon: <Brain className="h-8 w-8 text-spirit-purple" />
+    icon: <Compass className="h-8 w-8 text-spirit-purple" />
   },
   {
     title: "Rapports détaillés",
     description: "Exportez et partagez vos résultats facilement",
-    icon: <CheckCircle2 className="h-8 w-8 text-spirit-purple" />
+    icon: <BookOpen className="h-8 w-8 text-spirit-purple" />
   }
 ];
 
@@ -84,7 +84,7 @@ const LandingPage: React.FC = () => {
           </div>
           <div className="relative rounded-xl overflow-hidden shadow-2xl">
             <img 
-              src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cGVyc29uYWwlMjBkZXZlbG9wbWVudHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=80" 
+              src="https://img.freepik.com/vecteurs-libre/illustration-ramadan-kareem-mosquee-or_1035-19402.jpg" 
               alt="Spiritual Growth Dashboard" 
               className="w-full h-auto object-cover"
             />
@@ -126,18 +126,23 @@ const LandingPage: React.FC = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            <DimensionCard icon={<Brain className="h-12 w-12" />} title="Psychologie" color="bg-blue-50" textColor="text-blue-700" />
+            <DimensionCard icon={<Compass className="h-12 w-12" />} title="Psychologie" color="bg-blue-50" textColor="text-blue-700" />
             <DimensionCard icon={<Heart className="h-12 w-12" />} title="Santé" color="bg-green-50" textColor="text-green-700" />
-            <DimensionCard icon={<Lightbulb className="h-12 w-12" />} title="Spiritualité" color="bg-purple-50" textColor="text-spirit-purple" />
+            <DimensionCard icon={<Star className="h-12 w-12" />} title="Spiritualité" color="bg-purple-50" textColor="text-spirit-purple" />
             <DimensionCard icon={<Users className="h-12 w-12" />} title="Relations" color="bg-amber-50" textColor="text-amber-700" />
             <DimensionCard icon={<Coins className="h-12 w-12" />} title="Finances" color="bg-emerald-50" textColor="text-emerald-700" />
           </div>
         </div>
       </section>
       
-      {/* Testimonials Carousel */}
-      <section className="py-16 px-6 bg-gray-50">
-        <div className="max-w-5xl mx-auto">
+      {/* Testimonials Carousel with Islamic Background */}
+      <section className="py-16 px-6 bg-gray-50" 
+        style={{
+          backgroundImage: "url('https://img.freepik.com/vecteurs-libre/fond-motif-islamique-elegante-couleur-or_1017-30666.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center"
+        }}>
+        <div className="max-w-5xl mx-auto bg-white/90 p-8 rounded-xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4 text-gradient">Ce que disent nos utilisateurs</h2>
             <p className="text-gray-600">Découvrez les expériences de personnes qui ont transformé leur vie avec SpiritTrack</p>
