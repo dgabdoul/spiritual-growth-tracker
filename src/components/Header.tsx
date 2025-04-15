@@ -1,21 +1,21 @@
-
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
-import { cn } from '@/lib/utils';
-import { LogOut, User, BarChart3, Users, Settings, HelpCircle, Info, Home } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import Logo from '@/components/Logo';
 
-const Header = () => {
-  const { user, logout } = useAuth();
+const Header: React.FC = () => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/login');
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion', error);
+    }
+  };
 
   return (
     <header className="w-full py-3 px-6 sm:px-12 bg-white border-b border-gray-100 shadow-sm">
@@ -125,7 +125,7 @@ const Header = () => {
               </Button>
             </Link>
             
-            <Button variant="ghost" onClick={() => logout()} className="text-gray-600">
+            <Button variant="ghost" onClick={handleLogout} className="text-gray-600">
               <LogOut size={18} />
               <span className="hidden sm:inline ml-2">Déconnexion</span>
             </Button>

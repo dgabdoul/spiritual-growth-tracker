@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   session: Session | null;
@@ -12,6 +13,9 @@ interface AuthContextType {
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signOut: () => Promise<void>;
   loading: boolean;
+  requestPasswordReset: (email: string) => Promise<boolean>;
+  resetPassword: (token: string, newPassword: string) => Promise<boolean>;
+  validatePassword: (password: string) => { isValid: boolean; message: string };
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,6 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -91,6 +96,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     navigate('/login');
   };
 
+  const requestPasswordReset = async (email: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Log for demo purposes (remove in production)
+      console.log(`Password reset email sent to ${email}`);
+      return true;
+    } catch (error) {
+      console.error('Error requesting password reset:', error);
+      return false;
+    }
+  };
+
+  const resetPassword = async (token: string, newPassword: string): Promise<boolean> => {
+    try {
+      // In a real implementation, you would use the token to verify
+      // For Supabase, the updateUser method is used to set a new password
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      return false;
+    }
+  };
+
+  const validatePassword = (password: string): { isValid: boolean; message: string } => {
+    if (password.length < 8) {
+      return { isValid: false, message: "Le mot de passe doit contenir au moins 8 caractères" };
+    }
+    
+    if (!/[A-Z]/.test(password)) {
+      return { isValid: false, message: "Le mot de passe doit contenir au moins une lettre majuscule" };
+    }
+    
+    if (!/[0-9]/.test(password)) {
+      return { isValid: false, message: "Le mot de passe doit contenir au moins un chiffre" };
+    }
+    
+    if (!/[^A-Za-z0-9]/.test(password)) {
+      return { isValid: false, message: "Le mot de passe doit contenir au moins un caractère spécial" };
+    }
+    
+    return { isValid: true, message: "" };
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -101,6 +164,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signUp,
         signOut,
         loading,
+        requestPasswordReset,
+        resetPassword,
+        validatePassword,
       }}
     >
       {children}

@@ -44,9 +44,9 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 
 // Index route component - Redirects based on authentication status
 const IndexRoute = () => {
-  const { user, isLoading } = useAuth();
+  const { user, loading } = useAuth();
   
-  if (isLoading) {
+  if (loading) {
     return <div className="h-screen flex items-center justify-center">Chargement...</div>;
   }
   
@@ -59,13 +59,13 @@ const IndexRoute = () => {
 
 // Admin route component
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isLoading } = useAuth();
+  const { user, loading } = useAuth();
   
-  if (isLoading) {
+  if (loading) {
     return <div className="h-screen flex items-center justify-center">Chargement...</div>;
   }
   
-  if (!user || user.email !== "admin@example.com") {
+  if (!user || !user.email || user.email !== "admin@example.com") {
     return <Navigate to="/login" replace />;
   }
   
@@ -74,9 +74,9 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isLoading } = useAuth();
+  const { user, loading } = useAuth();
   
-  if (isLoading) {
+  if (loading) {
     return <div className="h-screen flex items-center justify-center">Chargement...</div>;
   }
   

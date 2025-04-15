@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Assessment } from '@/contexts/AssessmentContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const PrintView: React.FC = () => {
   const [assessment, setAssessment] = useState<Assessment | null>(null);
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   useEffect(() => {
     // Load assessment from localStorage
@@ -76,7 +75,7 @@ const PrintView: React.FC = () => {
         </p>
         {user && (
           <p className="text-gray-800 mt-3">
-            <span className="font-medium">Client:</span> {user.displayName || user.email}
+            <span className="font-medium">Client:</span> {profile?.display_name || user?.email || "Utilisateur"}
           </p>
         )}
       </div>
@@ -179,7 +178,7 @@ const PrintView: React.FC = () => {
         </div>
         <p>Rapport généré le {format(new Date(), 'dd MMMM yyyy', { locale: fr })}</p>
         <p className="mt-1">www.spirittrack.com</p>
-        {user && <p className="mt-1">Préparé pour: {user.displayName || user.email}</p>}
+        {user && <p className="mt-1">Préparé pour: {profile?.display_name || user?.email || "Utilisateur"}</p>}
       </div>
     </div>
   );
