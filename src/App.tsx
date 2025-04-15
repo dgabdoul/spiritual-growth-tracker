@@ -2,6 +2,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { AssessmentProvider } from "./contexts/AssessmentContext";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
 
@@ -26,9 +30,6 @@ import DonationSuccessPage from "./pages/DonationSuccessPage";
 // Admin Pages
 import UsersManagement from "./pages/Admin/UsersManagement";
 import Statistics from "./pages/Admin/Statistics";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { AssessmentProvider } from "./contexts/AssessmentContext";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 
 const queryClient = new QueryClient();
 
@@ -46,7 +47,6 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Index route component - Redirects based on authentication status
 const IndexRoute = () => {
   const { user, loading } = useAuth();
   
@@ -61,7 +61,6 @@ const IndexRoute = () => {
   return <Navigate to="/register" replace />;
 };
 
-// Admin route component
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
@@ -76,7 +75,6 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
@@ -91,7 +89,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Print route component - Less restrictive, allows non-authenticated access for sharing
 const PrintRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
@@ -100,6 +97,8 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<IndexRoute />} />
+      
+      {/* Public Routes */}
       <Route path="/landing" element={<LandingPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/login" element={<LoginPage />} />
@@ -107,6 +106,10 @@ const AppRoutes = () => {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
       <Route path="/support" element={<SupportContactPage />} />
+      <Route path="/donation" element={<DonationPage />} />
+      <Route path="/donation/success" element={<DonationSuccessPage />} />
+      <Route path="/privacy" element={<PrivacyPolicyPage />} />
+      <Route path="/terms" element={<TermsOfServicePage />} />
       
       {/* Protected Routes */}
       <Route path="/dashboard" element={
@@ -139,7 +142,7 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
-      {/* Print view - accessible without login for sharing */}
+      {/* Print Routes */}
       <Route path="/assessment/print" element={
         <PrintRoute>
           <PrintView />
@@ -158,14 +161,6 @@ const AppRoutes = () => {
           <Statistics />
         </AdminRoute>
       } />
-      
-      {/* Legal Pages */}
-      <Route path="/privacy" element={<PrivacyPolicyPage />} />
-      <Route path="/terms" element={<TermsOfServicePage />} />
-      
-      {/* Donation Routes */}
-      <Route path="/donation" element={<DonationPage />} />
-      <Route path="/donation/success" element={<DonationSuccessPage />} />
       
       {/* Catch all */}
       <Route path="*" element={<NotFound />} />
