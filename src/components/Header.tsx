@@ -10,7 +10,8 @@ import {
   LogOut, 
   BarChart3, 
   Settings,
-  Users
+  Users,
+  Heart  // Adding Heart icon for donations
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -142,6 +143,14 @@ const Header: React.FC = () => {
                 Support
               </Button>
             </Link>
+
+            {/* New Donation Link */}
+            <Link to="/donation">
+              <Button variant="outline" className="text-spirit-purple hover:bg-spirit-soft-purple/10">
+                <Heart size={18} className="mr-2" />
+                Faire un don
+              </Button>
+            </Link>
             
             <Button variant="ghost" onClick={handleLogout} className="text-gray-600">
               <LogOut size={18} />
@@ -168,6 +177,15 @@ const Header: React.FC = () => {
                 Support
               </Button>
             </Link>
+            
+            {/* New Donation Link */}
+            <Link to="/donation">
+              <Button variant="outline" className="text-spirit-purple hover:bg-spirit-soft-purple/10">
+                <Heart size={18} className="mr-2" />
+                Faire un don
+              </Button>
+            </Link>
+
             <Link to="/login">
               <Button variant="ghost">Connexion</Button>
             </Link>
@@ -211,3 +229,4 @@ const ListItem = React.forwardRef<
 ListItem.displayName = "ListItem";
 
 export default Header;
+
