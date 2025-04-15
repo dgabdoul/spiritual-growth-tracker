@@ -1,8 +1,26 @@
+
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import Logo from '@/components/Logo';
+import { 
+  Home, 
+  Info, 
+  HelpCircle, 
+  LogOut, 
+  BarChart3, 
+  Settings,
+  Users
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from '@/components/ui/navigation-menu';
 
 const Header: React.FC = () => {
   const { user, signOut } = useAuth();
