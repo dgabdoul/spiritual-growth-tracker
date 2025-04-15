@@ -18,6 +18,8 @@ import AssessmentHistory from "./pages/Assessment/AssessmentHistory";
 import PrintView from "./pages/Assessment/PrintView";
 import NotFound from "./pages/NotFound";
 import SupportContactPage from "./pages/SupportContactPage";
+import PrivacyPolicyPage from "./pages/Legal/PrivacyPolicyPage";
+import TermsOfServicePage from "./pages/Legal/TermsOfServicePage";
 
 // Admin Pages
 import UsersManagement from "./pages/Admin/UsersManagement";
@@ -154,6 +156,10 @@ const AppRoutes = () => {
           <Statistics />
         </AdminRoute>
       } />
+      
+      {/* Legal Pages */}
+      <Route path="/privacy" element={<PrivacyPolicyPage />} />
+      <Route path="/terms" element={<TermsOfServicePage />} />
       
       {/* Catch all */}
       <Route path="*" element={<NotFound />} />
