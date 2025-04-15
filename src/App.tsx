@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -18,8 +19,8 @@ import AssessmentHistory from "./pages/Assessment/AssessmentHistory";
 import PrintView from "./pages/Assessment/PrintView";
 import NotFound from "./pages/NotFound";
 import SupportContactPage from "./pages/SupportContactPage";
-import PrivacyPolicyPage from "./pages/Legal/PrivacyPolicyPage";
-import TermsOfServicePage from "./pages/Legal/TermsOfServicePage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import TermsOfServicePage from "./pages/TermsOfServicePage";
 
 // Admin Pages
 import UsersManagement from "./pages/Admin/UsersManagement";
