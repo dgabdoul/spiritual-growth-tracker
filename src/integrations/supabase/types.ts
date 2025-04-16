@@ -14,6 +14,8 @@ export type Database = {
           amount: number
           created_at: string | null
           currency: string
+          donor_country: string | null
+          donor_name: string | null
           id: string
           moneroo_payment_id: string | null
           status: string
@@ -24,6 +26,8 @@ export type Database = {
           amount: number
           created_at?: string | null
           currency?: string
+          donor_country?: string | null
+          donor_name?: string | null
           id?: string
           moneroo_payment_id?: string | null
           status?: string
@@ -34,6 +38,8 @@ export type Database = {
           amount?: number
           created_at?: string | null
           currency?: string
+          donor_country?: string | null
+          donor_name?: string | null
           id?: string
           moneroo_payment_id?: string | null
           status?: string

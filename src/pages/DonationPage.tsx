@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,19 +16,27 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { useForm } from "react-hook-form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-interface DonationFormData {
-  fullName: string;
-  country: string;
-  amount: string;
-}
+// Define a schema for form validation
+const donationSchema = z.object({
+  fullName: z.string().min(2, { message: "Le nom doit contenir au moins 2 caractères" }),
+  country: z.string().min(2, { message: "Veuillez entrer un pays valide" }),
+  amount: z.string().refine(val => {
+    const num = parseFloat(val);
+    return !isNaN(num) && num > 0;
+  }, { message: "Veuillez entrer un montant valide" })
+});
+
+type DonationFormData = z.infer<typeof donationSchema>;
 
 const DonationPage = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<DonationFormData>({
+    resolver: zodResolver(donationSchema),
     defaultValues: {
       fullName: '',
       country: '',
@@ -36,24 +45,15 @@ const DonationPage = () => {
   });
 
   const handleDonation = async (data: DonationFormData) => {
-    if (!data.amount || parseFloat(data.amount) <= 0) {
-      toast({
-        title: "Montant invalide",
-        description: "Veuillez entrer un montant valide",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setIsLoading(true);
     try {
-      // Créer l'entrée dans la base de données avec les données du donateur
+      // Create donation entry in the database
       const { data: donation, error: dbError } = await supabase
         .from('donations')
         .insert({
           amount: parseFloat(data.amount),
           currency: 'XOF',
-          user_id: null, // Pas besoin d'être connecté
+          user_id: null, // No login required
           status: 'pending',
           donor_name: data.fullName,
           donor_country: data.country
@@ -61,9 +61,16 @@ const DonationPage = () => {
         .select()
         .single();
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error('Database error:', dbError);
+        throw dbError;
+      }
 
-      // Redirection vers Moneroo pour le paiement
+      if (!donation) {
+        throw new Error('No donation data returned');
+      }
+
+      // Redirect to Moneroo for payment
       const response = await fetch('https://api.moneroo.io/v1/payment-links', {
         method: 'POST',
         headers: {
@@ -71,7 +78,7 @@ const DonationPage = () => {
           'Authorization': `Bearer pvk_sandbox_3y2rc0|01JRVFHQR9QHXA64QQS84FB4GF`
         },
         body: JSON.stringify({
-          amount: parseFloat(data.amount) * 100,
+          amount: parseFloat(data.amount) * 100, // Moneroo expects amount in cents
           currency: 'XOF',
           redirect_url: window.location.origin + '/donation/success',
           cancel_url: window.location.origin + '/donation',
@@ -83,13 +90,21 @@ const DonationPage = () => {
         })
       });
 
-      if (!response.ok) throw new Error('Erreur lors de la création du lien de paiement');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Payment API error:', errorText);
+        throw new Error(`Erreur lors de la création du lien de paiement: ${response.status} ${response.statusText}`);
+      }
 
       const paymentData = await response.json();
-      window.location.href = paymentData.url;
+      if (paymentData && paymentData.url) {
+        window.location.href = paymentData.url;
+      } else {
+        throw new Error('URL de paiement non reçue');
+      }
 
     } catch (error) {
-      console.error('Erreur:', error);
+      console.error('Error:', error);
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors du traitement de votre don",
