@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,8 +9,7 @@ import {
   LogOut, 
   BarChart3, 
   Settings,
-  Users,
-  Heart  // Adding Heart icon for donations
+  Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -143,14 +141,6 @@ const Header: React.FC = () => {
                 Support
               </Button>
             </Link>
-
-            {/* New Donation Link */}
-            <Link to="/donation">
-              <Button variant="outline" className="text-spirit-purple hover:bg-spirit-soft-purple/10">
-                <Heart size={18} className="mr-2" />
-                Faire un don
-              </Button>
-            </Link>
             
             <Button variant="ghost" onClick={handleLogout} className="text-gray-600">
               <LogOut size={18} />
@@ -175,14 +165,6 @@ const Header: React.FC = () => {
               <Button variant="outline">
                 <HelpCircle size={18} className="mr-2" />
                 Support
-              </Button>
-            </Link>
-            
-            {/* New Donation Link */}
-            <Link to="/donation">
-              <Button variant="outline" className="text-spirit-purple hover:bg-spirit-soft-purple/10">
-                <Heart size={18} className="mr-2" />
-                Faire un don
               </Button>
             </Link>
 
@@ -229,4 +211,3 @@ const ListItem = React.forwardRef<
 ListItem.displayName = "ListItem";
 
 export default Header;
-

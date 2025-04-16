@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -24,8 +23,6 @@ import NotFound from "./pages/NotFound";
 import SupportContactPage from "./pages/SupportContactPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
-import DonationPage from "./pages/DonationPage";
-import DonationSuccessPage from "./pages/DonationSuccessPage";
 import UsersManagement from "./pages/Admin/UsersManagement";
 import Statistics from "./pages/Admin/Statistics";
 
@@ -107,8 +104,6 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
         <Route path="/support" element={<SupportContactPage />} />
-        <Route path="/donation" element={<DonationPage />} />
-        <Route path="/donation/success" element={<DonationSuccessPage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
         <Route path="/terms" element={<TermsOfServicePage />} />
         
