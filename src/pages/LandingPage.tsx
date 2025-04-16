@@ -84,8 +84,8 @@ const LandingPage: React.FC = () => {
           </div>
           <div className="relative rounded-xl overflow-hidden shadow-2xl">
             <img 
-              src="https://img.freepik.com/vecteurs-libre/illustration-ramadan-kareem-mosquee-or_1035-19402.jpg" 
-              alt="Spiritual Growth Dashboard" 
+              src="/lovable-uploads/0101b87a-45a9-40d3-92b5-b71cdf749a5a.png" 
+              alt="Digital Muslim Services Illustration" 
               className="w-full h-auto object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-tr from-spirit-purple/30 to-transparent mix-blend-overlay"></div>
