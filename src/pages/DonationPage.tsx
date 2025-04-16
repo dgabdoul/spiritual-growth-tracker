@@ -4,28 +4,40 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Heart, Loader2 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { Heart, User, Flag, DollarSign, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { useForm } from "react-hook-form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+interface DonationFormData {
+  fullName: string;
+  country: string;
+  amount: string;
+}
 
 const DonationPage = () => {
-  const { user } = useAuth();
   const { toast } = useToast();
-  const [amount, setAmount] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleDonation = async () => {
-    if (!user) {
-      toast({
-        title: "Connexion requise",
-        description: "Veuillez vous connecter pour faire un don",
-        variant: "destructive"
-      });
-      return;
+  const form = useForm<DonationFormData>({
+    defaultValues: {
+      fullName: '',
+      country: '',
+      amount: ''
     }
+  });
 
-    if (!amount || parseFloat(amount) <= 0) {
+  const handleDonation = async (data: DonationFormData) => {
+    if (!data.amount || parseFloat(data.amount) <= 0) {
       toast({
         title: "Montant invalide",
         description: "Veuillez entrer un montant valide",
@@ -36,13 +48,14 @@ const DonationPage = () => {
 
     setIsLoading(true);
     try {
-      // Créer l'entrée dans la base de données
+      // Créer l'entrée dans la base de données même sans utilisateur connecté
       const { data: donation, error: dbError } = await supabase
         .from('donations')
         .insert({
-          user_id: user.id,
-          amount: parseFloat(amount),
-          currency: 'EUR',
+          amount: parseFloat(data.amount),
+          currency: 'XOF',
+          donor_name: data.fullName,
+          donor_country: data.country
         })
         .select()
         .single();
@@ -57,12 +70,14 @@ const DonationPage = () => {
           'Authorization': `Bearer pvk_sandbox_3y2rc0|01JRVFHQR9QHXA64QQS84FB4GF`
         },
         body: JSON.stringify({
-          amount: parseFloat(amount) * 100, // Moneroo attend le montant en centimes
-          currency: 'EUR',
+          amount: parseFloat(data.amount) * 100, // Moneroo attend le montant en centimes
+          currency: 'XOF',
           redirect_url: window.location.origin + '/donation/success',
           cancel_url: window.location.origin + '/donation',
           metadata: {
-            donation_id: donation.id
+            donation_id: donation.id,
+            donor_name: data.fullName,
+            donor_country: data.country
           }
         })
       });
@@ -93,37 +108,94 @@ const DonationPage = () => {
             Soutenez notre mission en faisant un don
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="amount" className="block text-sm font-medium">
-              Montant (EUR)
-            </label>
-            <Input
-              id="amount"
-              type="number"
-              min="1"
-              step="1"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Entrez le montant"
-              className="w-full"
-            />
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button 
-            className="w-full" 
-            onClick={handleDonation} 
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <Heart className="h-4 w-4 mr-2" />
-            )}
-            {isLoading ? 'Traitement...' : 'Faire un don'}
-          </Button>
-        </CardFooter>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleDonation)}>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="fullName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nom complet</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                        <Input className="pl-9" placeholder="Votre nom" {...field} />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Pays</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="pl-9 relative">
+                          <Flag className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                          <SelectValue placeholder="Sélectionnez votre pays" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="senegal">Sénégal</SelectItem>
+                        <SelectItem value="mali">Mali</SelectItem>
+                        <SelectItem value="benin">Bénin</SelectItem>
+                        <SelectItem value="burkina">Burkina Faso</SelectItem>
+                        <SelectItem value="ivorycoast">Côte d'Ivoire</SelectItem>
+                        <SelectItem value="niger">Niger</SelectItem>
+                        <SelectItem value="togo">Togo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Montant (XOF)</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <DollarSign className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                        <Input 
+                          type="number" 
+                          min="1" 
+                          step="1"
+                          className="pl-9"
+                          placeholder="Montant du don"
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+            <CardFooter>
+              <Button 
+                className="w-full" 
+                type="submit"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Heart className="h-4 w-4 mr-2" />
+                )}
+                {isLoading ? 'Traitement...' : 'Faire un don'}
+              </Button>
+            </CardFooter>
+          </form>
+        </Form>
       </Card>
     </div>
   );
