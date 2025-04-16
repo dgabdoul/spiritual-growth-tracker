@@ -32,7 +32,7 @@ const DonationSuccessPage = () => {
             toast({
               title: "Attention",
               description: "Votre paiement a été traité, mais nous n'avons pas pu mettre à jour nos dossiers.",
-              variant: "warning"
+              variant: "default" // Changed from "warning" to "default"
             });
           }
         } catch (err) {
