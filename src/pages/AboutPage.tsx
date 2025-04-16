@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -42,8 +41,8 @@ const AboutPage: React.FC = () => {
             </div>
             <div className="relative rounded-xl overflow-hidden shadow-lg">
               <img 
-                src="https://img.freepik.com/vecteurs-libre/fond-conception-lanternes-islamiques-aquarelles_23-2149374210.jpg" 
-                alt="Notre mission" 
+                src="https://img.freepik.com/vecteurs-libre/illustration-du-concept-zakat_82647935.htm" 
+                alt="Notre mission - Zakat et développement spirituel" 
                 className="w-full h-auto object-cover"
               />
             </div>

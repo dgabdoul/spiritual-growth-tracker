@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -48,12 +47,14 @@ const DonationPage = () => {
 
     setIsLoading(true);
     try {
-      // Créer l'entrée dans la base de données même sans utilisateur connecté
+      // Créer l'entrée dans la base de données avec les données du donateur
       const { data: donation, error: dbError } = await supabase
         .from('donations')
         .insert({
           amount: parseFloat(data.amount),
           currency: 'XOF',
+          user_id: null, // Pas besoin d'être connecté
+          status: 'pending',
           donor_name: data.fullName,
           donor_country: data.country
         })
@@ -62,7 +63,7 @@ const DonationPage = () => {
 
       if (dbError) throw dbError;
 
-      // Rediriger vers Moneroo pour le paiement
+      // Redirection vers Moneroo pour le paiement
       const response = await fetch('https://api.moneroo.io/v1/payment-links', {
         method: 'POST',
         headers: {
@@ -70,7 +71,7 @@ const DonationPage = () => {
           'Authorization': `Bearer pvk_sandbox_3y2rc0|01JRVFHQR9QHXA64QQS84FB4GF`
         },
         body: JSON.stringify({
-          amount: parseFloat(data.amount) * 100, // Moneroo attend le montant en centimes
+          amount: parseFloat(data.amount) * 100,
           currency: 'XOF',
           redirect_url: window.location.origin + '/donation/success',
           cancel_url: window.location.origin + '/donation',
@@ -134,23 +135,16 @@ const DonationPage = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Pays</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="pl-9 relative">
-                          <Flag className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
-                          <SelectValue placeholder="Sélectionnez votre pays" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="senegal">Sénégal</SelectItem>
-                        <SelectItem value="mali">Mali</SelectItem>
-                        <SelectItem value="benin">Bénin</SelectItem>
-                        <SelectItem value="burkina">Burkina Faso</SelectItem>
-                        <SelectItem value="ivorycoast">Côte d'Ivoire</SelectItem>
-                        <SelectItem value="niger">Niger</SelectItem>
-                        <SelectItem value="togo">Togo</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <div className="relative">
+                        <Flag className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                        <Input 
+                          className="pl-9" 
+                          placeholder="Votre pays" 
+                          {...field} 
+                        />
+                      </div>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
