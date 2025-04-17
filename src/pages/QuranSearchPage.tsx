@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, Book } from 'lucide-react';
+import { Search, Book, Globe } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface QuranSearchResult {
@@ -36,6 +36,7 @@ const QuranSearchPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<QuranSearchResult | null>(null);
+  const [language, setLanguage] = useState<'en' | 'fr'>('en');
   const { toast } = useToast();
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -44,7 +45,8 @@ const QuranSearchPage: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`https://api.alquran.cloud/v1/search/${encodeURIComponent(searchTerm)}/all/en`);
+      // Use the selected language for the API call
+      const response = await fetch(`https://api.alquran.cloud/v1/search/${encodeURIComponent(searchTerm)}/all/${language}`);
       const data: QuranApiResponse = await response.json();
       
       if (data.code !== 200 || !data.data) {
@@ -55,20 +57,32 @@ const QuranSearchPage: React.FC = () => {
       
       if (data.data.count === 0) {
         toast({
-          title: "No results found",
-          description: "Try another search term or check your spelling",
+          title: language === 'en' ? "No results found" : "Aucun résultat trouvé",
+          description: language === 'en' 
+            ? "Try another search term or check your spelling" 
+            : "Essayez un autre terme ou vérifiez l'orthographe",
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error('Error searching Quran:', error);
       toast({
-        title: "Error",
-        description: "An error occurred while searching. Please try again.",
+        title: language === 'en' ? "Error" : "Erreur",
+        description: language === 'en' 
+          ? "An error occurred while searching. Please try again." 
+          : "Une erreur est survenue pendant la recherche. Veuillez réessayer.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const toggleLanguage = () => {
+    setLanguage(prevLang => prevLang === 'en' ? 'fr' : 'en');
+    if (searchResults) {
+      // Re-fetch results in the new language if we already have results
+      handleSearch(new Event('submit') as any);
     }
   };
 
@@ -83,10 +97,23 @@ const QuranSearchPage: React.FC = () => {
         
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Recherche de Versets</CardTitle>
-            <CardDescription>
-              Entrez un mot ou une phrase pour trouver des versets correspondants
-            </CardDescription>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle>Recherche de Versets</CardTitle>
+                <CardDescription>
+                  Entrez un mot ou une phrase pour trouver des versets correspondants
+                </CardDescription>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1" 
+                onClick={toggleLanguage}
+              >
+                <Globe className="h-4 w-4" />
+                {language === 'en' ? 'Français' : 'English'}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSearch} className="flex w-full items-center gap-2">
@@ -94,14 +121,17 @@ const QuranSearchPage: React.FC = () => {
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   type="text"
-                  placeholder="Exemple: Abraham, Moses, Jesus..."
+                  placeholder={language === 'en' ? "Example: Abraham, Moses, Jesus..." : "Exemple: Abraham, Moïse, Jésus..."}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
               <Button type="submit" className="bg-spirit-purple hover:bg-spirit-deep-purple" disabled={isLoading}>
-                {isLoading ? "Recherche..." : "Rechercher"}
+                {isLoading 
+                  ? (language === 'en' ? "Searching..." : "Recherche...") 
+                  : (language === 'en' ? "Search" : "Rechercher")
+                }
               </Button>
             </form>
           </CardContent>
@@ -118,7 +148,9 @@ const QuranSearchPage: React.FC = () => {
         {!isLoading && searchResults && (
           <div className="mt-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Résultats ({searchResults.count})</h2>
+              <h2 className="text-xl font-semibold">
+                {language === 'en' ? `Results (${searchResults.count})` : `Résultats (${searchResults.count})`}
+              </h2>
             </div>
 
             {searchResults.count > 0 ? (
@@ -128,18 +160,31 @@ const QuranSearchPage: React.FC = () => {
                     <div className="p-4">
                       <Tabs defaultValue="translation">
                         <TabsList className="mb-2">
-                          <TabsTrigger value="translation">Traduction</TabsTrigger>
-                          <TabsTrigger value="info">Informations</TabsTrigger>
+                          <TabsTrigger value="translation">
+                            {language === 'en' ? 'Translation' : 'Traduction'}
+                          </TabsTrigger>
+                          <TabsTrigger value="info">
+                            {language === 'en' ? 'Information' : 'Informations'}
+                          </TabsTrigger>
                         </TabsList>
                         <TabsContent value="translation">
                           <div className="text-lg" dir="auto">{match.text}</div>
                         </TabsContent>
                         <TabsContent value="info">
                           <div className="text-sm text-gray-600 space-y-1">
-                            <p>Sourate: {match.surah.englishName} ({match.surah.number})</p>
-                            <p>Signification: {match.surah.englishNameTranslation}</p>
-                            <p>Verset: {match.numberInSurah}</p>
-                            <p>Page: {match.page} | Juz: {match.juz}</p>
+                            <p>
+                              {language === 'en' ? 'Surah' : 'Sourate'}: {match.surah.englishName} ({match.surah.number})
+                            </p>
+                            <p>
+                              {language === 'en' ? 'Meaning' : 'Signification'}: {match.surah.englishNameTranslation}
+                            </p>
+                            <p>
+                              {language === 'en' ? 'Verse' : 'Verset'}: {match.numberInSurah}
+                            </p>
+                            <p>
+                              {language === 'en' ? 'Page' : 'Page'}: {match.page} | 
+                              {language === 'en' ? ' Juz' : ' Juz'}: {match.juz}
+                            </p>
                           </div>
                         </TabsContent>
                       </Tabs>
@@ -153,8 +198,16 @@ const QuranSearchPage: React.FC = () => {
               </div>
             ) : (
               <Card className="p-6 text-center">
-                <p className="text-gray-500">Aucun résultat trouvé pour "{searchTerm}"</p>
-                <p className="text-sm text-gray-400 mt-1">Essayez un autre terme ou vérifiez l'orthographe</p>
+                <p className="text-gray-500">
+                  {language === 'en' 
+                    ? `No results found for "${searchTerm}"` 
+                    : `Aucun résultat trouvé pour "${searchTerm}"`}
+                </p>
+                <p className="text-sm text-gray-400 mt-1">
+                  {language === 'en' 
+                    ? "Try another term or check your spelling" 
+                    : "Essayez un autre terme ou vérifiez l'orthographe"}
+                </p>
               </Card>
             )}
           </div>
