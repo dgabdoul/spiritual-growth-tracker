@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -49,7 +48,6 @@ const AssessmentCategory: React.FC = () => {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Make sure category is valid
   const currentCategory = useMemo(() => {
     if (category && categoryOrder.includes(category as Category)) {
       return category as Category;
@@ -57,16 +55,13 @@ const AssessmentCategory: React.FC = () => {
     return categoryOrder[0];
   }, [category]);
 
-  // Get category index for progress
   const currentIndex = categoryOrder.indexOf(currentCategory);
   const progressValue = ((currentIndex + 1) / categoryOrder.length) * 100;
 
-  // Filter questions by category
   const categoryQuestions = useMemo(() => {
     return questions.filter(q => q.category === currentCategory);
   }, [currentCategory]);
 
-  // Handle navigation
   const navigateToNextCategory = async () => {
     if (currentIndex < categoryOrder.length - 1) {
       const nextCategory = categoryOrder[currentIndex + 1];
@@ -75,7 +70,6 @@ const AssessmentCategory: React.FC = () => {
       setIsSubmitting(true);
       
       try {
-        // Calculer les scores
         const scores = {
           psychology: 0,
           health: 0,
@@ -92,7 +86,6 @@ const AssessmentCategory: React.FC = () => {
           finances: 0
         };
         
-        // Calculer les scores par catégorie
         Object.entries(answers).forEach(([questionId, rating]) => {
           const question = questions.find(q => q.id === questionId);
           if (question && question.category) {
@@ -101,7 +94,6 @@ const AssessmentCategory: React.FC = () => {
           }
         });
         
-        // Convertir en pourcentage
         const finalScores = {
           psychology_score: Math.round((scores.psychology / (totalQuestions.psychology * 5)) * 100),
           health_score: Math.round((scores.health / (totalQuestions.health * 5)) * 100),
@@ -110,7 +102,6 @@ const AssessmentCategory: React.FC = () => {
           finances_score: Math.round((scores.finances / (totalQuestions.finances * 5)) * 100)
         };
         
-        // Calculer le score global
         const overallScore = Math.round(
           (finalScores.psychology_score + 
            finalScores.health_score + 
@@ -119,7 +110,6 @@ const AssessmentCategory: React.FC = () => {
            finalScores.finances_score) / 5
         );
         
-        // Sauvegarder dans Supabase
         if (user) {
           const { error } = await supabase
             .from('user_assessments')
@@ -136,7 +126,6 @@ const AssessmentCategory: React.FC = () => {
           toast.success("Évaluation enregistrée avec succès");
         }
         
-        // Sauvegarder dans le state local pour l'affichage
         saveAssessment();
         navigate('/assessment/results');
       } catch (error) {
@@ -156,16 +145,13 @@ const AssessmentCategory: React.FC = () => {
     }
   };
 
-  // Handle input changes
   const handleRatingChange = (questionId: string, value: number) => {
     setAnswer(questionId, value);
   };
 
-  // Determine button label
   const isLastCategory = currentIndex === categoryOrder.length - 1;
   const nextButtonLabel = isLastCategory ? 'Terminer l\'évaluation' : 'Suivant';
 
-  // Legend for ratings
   const ratingLegend = [
     { value: 1, label: "Délaissé (très faible)" },
     { value: 2, label: "Paresse / Reprise à zéro" },

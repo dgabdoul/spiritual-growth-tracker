@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -59,7 +58,6 @@ const UsersManagement: React.FC = () => {
     fetchUsers();
   }, [isAdmin]);
 
-  // Si l'utilisateur n'est pas admin, rediriger
   if (!user || !isAdmin) {
     return (
       <div className="flex flex-col min-h-screen bg-background">
