@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -76,16 +77,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, displayName: string) => {
-    const { error } = await supabase.auth.signUp({
+    const { error, data } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           display_name: displayName,
         },
+        // This is the key change - disable email verification
+        emailRedirectTo: `${window.location.origin}/login`,
       },
     });
+    
     if (error) throw error;
+    
+    // If signup was successful but we're waiting for email confirmation
+    if (data.user && !data.session) {
+      toast.success("Compte créé avec succès", {
+        description: "Vous pouvez maintenant vous connecter directement."
+      });
+    }
   };
 
   const signIn = async (email: string, password: string) => {

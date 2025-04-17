@@ -57,9 +57,17 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">
-                Mot de passe
-              </label>
+              <div className="flex justify-between items-center">
+                <label htmlFor="password" className="text-sm font-medium">
+                  Mot de passe
+                </label>
+                <Link
+                  to="/forgot-password"
+                  className="text-xs text-primary hover:underline"
+                >
+                  Mot de passe oublié?
+                </Link>
+              </div>
               <Input
                 id="password"
                 type="password"
@@ -73,13 +81,17 @@ export default function LoginPage() {
             </Button>
           </form>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex flex-col gap-4">
           <p className="text-sm text-center w-full">
             Pas encore de compte?{' '}
             <Link to="/register" className="text-primary hover:underline">
               S'inscrire
             </Link>
           </p>
+          <div className="text-xs text-gray-500 text-center">
+            <p>Nouveau compte? Vous pouvez vous connecter directement après votre inscription.</p>
+            <p>Pas besoin de vérification par email.</p>
+          </div>
         </CardFooter>
       </Card>
     </div>

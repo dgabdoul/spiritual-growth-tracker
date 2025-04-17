@@ -12,19 +12,26 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, validatePassword } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const validation = validatePassword(password);
+    if (!validation.isValid) {
+      toast({
+        title: "Mot de passe invalide",
+        description: validation.message,
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
       setLoading(true);
       await signUp(email, password, displayName);
-      toast({
-        title: "Compte créé avec succès",
-        description: "Vous pouvez maintenant vous connecter",
-      });
       navigate('/login');
     } catch (error) {
       toast({
@@ -85,6 +92,9 @@ export default function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              <p className="text-xs text-gray-500">
+                Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial.
+              </p>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Création du compte...' : 'Créer un compte'}
