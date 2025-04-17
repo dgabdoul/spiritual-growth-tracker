@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,58 +7,60 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Check, UserPlus, X, Edit2, Trash2, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/sonner';
 import Header from '@/components/Header';
+import { supabase } from '@/integrations/supabase/client';
 
 type User = {
   id: string;
   email: string;
-  displayName?: string;
-  isAdmin: boolean;
-  createdAt: string;
-  lastLogin?: string;
+  display_name?: string;
+  role: string;
+  created_at: string;
+  last_sign_in_at?: string;
 };
 
 const UsersManagement: React.FC = () => {
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const { user, isAdmin } = useAuth();
+  const { toast: uiToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: 'user-123',
-      email: 'admin@example.com',
-      displayName: 'Admin',
-      isAdmin: true,
-      createdAt: '2023-03-15',
-      lastLogin: '2023-04-12'
-    },
-    {
-      id: 'user-456',
-      email: 'jean.dupont@example.com',
-      displayName: 'Jean Dupont',
-      isAdmin: false,
-      createdAt: '2023-03-18',
-      lastLogin: '2023-04-10'
-    },
-    {
-      id: 'user-789',
-      email: 'marie.martin@example.com',
-      displayName: 'Marie Martin',
-      isAdmin: false,
-      createdAt: '2023-03-25',
-      lastLogin: '2023-04-08'
-    },
-    {
-      id: 'user-101',
-      email: 'pierre.dubois@example.com',
-      displayName: 'Pierre Dubois',
-      isAdmin: false,
-      createdAt: '2023-04-01',
-      lastLogin: '2023-04-05'
-    }
-  ]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (!isAdmin) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*');
+
+        if (error) throw error;
+        
+        if (data) {
+          setUsers(data.map(profile => ({
+            id: profile.id,
+            email: profile.email || 'Email non disponible',
+            display_name: profile.display_name || 'Sans nom',
+            role: profile.role || 'user',
+            created_at: new Date(profile.created_at).toLocaleDateString('fr-FR'),
+            last_sign_in_at: profile.updated_at ? new Date(profile.updated_at).toLocaleDateString('fr-FR') : undefined
+          })));
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des utilisateurs:', error);
+        toast.error('Erreur lors du chargement des utilisateurs');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [isAdmin]);
 
   // Si l'utilisateur n'est pas admin, rediriger
-  if (!user || user.email !== "admin@example.com") {
+  if (!user || !isAdmin) {
     return (
       <div className="flex flex-col min-h-screen bg-background">
         <Header />
@@ -73,34 +75,78 @@ const UsersManagement: React.FC = () => {
   }
 
   const handleAddUser = () => {
-    toast({
-      title: "Fonctionnalité à venir",
-      description: "La fonctionnalité d'ajout d'utilisateur sera disponible prochainement.",
+    toast.info("Fonctionnalité à venir", {
+      description: "La fonctionnalité d'ajout d'utilisateur sera disponible prochainement."
     });
   };
 
-  const handleDeleteUser = (userId: string) => {
-    setUsers(users.filter(user => user.id !== userId));
-    toast({
-      title: "Utilisateur supprimé",
-      description: "L'utilisateur a été supprimé avec succès.",
-    });
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      setUsers(users.filter(user => user.id !== userId));
+      toast.success("Utilisateur supprimé", {
+        description: "L'utilisateur a été supprimé avec succès."
+      });
+    } catch (error) {
+      console.error('Erreur lors de la suppression de l\'utilisateur:', error);
+      toast.error("Erreur", {
+        description: "Une erreur s'est produite lors de la suppression de l'utilisateur."
+      });
+    }
   };
 
-  const handleToggleAdmin = (userId: string) => {
-    setUsers(users.map(user => 
-      user.id === userId ? { ...user, isAdmin: !user.isAdmin } : user
-    ));
-    toast({
-      title: "Droits modifiés",
-      description: "Les droits d'administration ont été mis à jour.",
-    });
+  const handleToggleAdmin = async (userId: string, currentRole: string) => {
+    const newRole = currentRole === 'admin' ? 'user' : 'admin';
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: newRole })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      setUsers(users.map(user => 
+        user.id === userId ? { ...user, role: newRole } : user
+      ));
+      
+      toast.success("Droits modifiés", {
+        description: "Les droits d'administration ont été mis à jour."
+      });
+    } catch (error) {
+      console.error('Erreur lors de la modification des droits:', error);
+      toast.error("Erreur", {
+        description: "Une erreur s'est produite lors de la modification des droits."
+      });
+    }
   };
 
   const filteredUsers = users.filter(user => 
     user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (user.displayName && user.displayName.toLowerCase().includes(searchTerm.toLowerCase()))
+    (user.display_name && user.display_name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-background">
+        <Header />
+        <main className="flex-1 p-6">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-spirit-purple mx-auto"></div>
+              <p className="mt-4 text-gray-600">Chargement des utilisateurs...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -149,18 +195,18 @@ const UsersManagement: React.FC = () => {
                     <TableRow key={user.id}>
                       <TableCell className="font-medium">
                         <div>
-                          <div>{user.displayName || "Sans nom"}</div>
+                          <div>{user.display_name}</div>
                           <div className="text-sm text-muted-foreground">{user.email}</div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <Button
-                          variant={user.isAdmin ? "default" : "outline"}
+                          variant={user.role === 'admin' ? "default" : "outline"}
                           size="sm"
-                          className={user.isAdmin ? "bg-green-600 hover:bg-green-700" : ""}
-                          onClick={() => handleToggleAdmin(user.id)}
+                          className={user.role === 'admin' ? "bg-green-600 hover:bg-green-700" : ""}
+                          onClick={() => handleToggleAdmin(user.id, user.role)}
                         >
-                          {user.isAdmin ? (
+                          {user.role === 'admin' ? (
                             <>
                               <Check className="mr-1 h-4 w-4" /> Oui
                             </>
@@ -171,14 +217,14 @@ const UsersManagement: React.FC = () => {
                           )}
                         </Button>
                       </TableCell>
-                      <TableCell>{user.createdAt}</TableCell>
-                      <TableCell>{user.lastLogin || "Jamais"}</TableCell>
+                      <TableCell>{user.created_at}</TableCell>
+                      <TableCell>{user.last_sign_in_at || "Jamais"}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button variant="ghost" size="icon">
                             <Edit2 className="h-4 w-4" />
                           </Button>
-                          {user.id !== 'user-123' && (
+                          {user.email !== 'admin@example.com' && (
                             <Button 
                               variant="ghost" 
                               size="icon"

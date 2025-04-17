@@ -4,6 +4,7 @@ import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/sonner';
 
 interface AuthContextType {
   session: Session | null;
@@ -14,8 +15,9 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   loading: boolean;
   requestPasswordReset: (email: string) => Promise<boolean>;
-  resetPassword: (token: string, newPassword: string) => Promise<boolean>;
+  resetPassword: (newPassword: string) => Promise<boolean>;
   validatePassword: (password: string) => { isValid: boolean; message: string };
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,8 +27,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -35,14 +38,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-          setProfile(profile);
+          setTimeout(async () => {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+              
+            setProfile(profile);
+            setIsAdmin(profile?.role === 'admin');
+          }, 0);
         } else {
           setProfile(null);
+          setIsAdmin(false);
         }
       }
     );
@@ -59,6 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .single()
           .then(({ data }) => {
             setProfile(data);
+            setIsAdmin(data?.role === 'admin');
           });
       }
       setLoading(false);
@@ -103,11 +112,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       
       if (error) {
-        throw error;
+        toast.error("Erreur lors de l'envoi de l'email de réinitialisation.", {
+          description: error.message
+        });
+        return false;
       }
       
-      // Log for demo purposes (remove in production)
-      console.log(`Password reset email sent to ${email}`);
+      toast.success("Email de réinitialisation envoyé", {
+        description: "Si un compte existe avec cette adresse email, vous recevrez des instructions pour réinitialiser votre mot de passe."
+      });
       return true;
     } catch (error) {
       console.error('Error requesting password reset:', error);
@@ -115,17 +128,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const resetPassword = async (token: string, newPassword: string): Promise<boolean> => {
+  const resetPassword = async (newPassword: string): Promise<boolean> => {
     try {
-      // In a real implementation, you would use the token to verify
-      // For Supabase, the updateUser method is used to set a new password
       const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });
       
       if (error) {
-        throw error;
+        toast.error("Erreur lors de la réinitialisation du mot de passe", {
+          description: error.message
+        });
+        return false;
       }
+      
+      toast.success("Mot de passe mis à jour avec succès", {
+        description: "Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
+      });
       
       return true;
     } catch (error) {
@@ -167,6 +185,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         requestPasswordReset,
         resetPassword,
         validatePassword,
+        isAdmin,
       }}
     >
       {children}

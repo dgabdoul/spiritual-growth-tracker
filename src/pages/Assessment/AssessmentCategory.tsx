@@ -7,6 +7,9 @@ import { Progress } from '@/components/ui/progress';
 import Header from '@/components/Header';
 import { ArrowLeft, ArrowRight, Brain, Heart, Lightbulb, Users, Coins, HelpCircle } from 'lucide-react';
 import { useAssessment, Category, questions } from '@/contexts/AssessmentContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/sonner';
 import RatingInput from '@/components/RatingInput';
 import { 
   Tooltip,
@@ -43,6 +46,7 @@ const AssessmentCategory: React.FC = () => {
   const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();
   const { answers, setAnswer, saveAssessment } = useAssessment();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Make sure category is valid
@@ -63,14 +67,83 @@ const AssessmentCategory: React.FC = () => {
   }, [currentCategory]);
 
   // Handle navigation
-  const navigateToNextCategory = () => {
+  const navigateToNextCategory = async () => {
     if (currentIndex < categoryOrder.length - 1) {
       const nextCategory = categoryOrder[currentIndex + 1];
       navigate(`/assessment/${nextCategory}`);
     } else {
       setIsSubmitting(true);
-      saveAssessment();
-      navigate('/assessment/results');
+      
+      try {
+        // Calculer les scores
+        const scores = {
+          psychology: 0,
+          health: 0,
+          spirituality: 0,
+          relationships: 0,
+          finances: 0
+        };
+        
+        let totalQuestions = {
+          psychology: 0,
+          health: 0,
+          spirituality: 0,
+          relationships: 0,
+          finances: 0
+        };
+        
+        // Calculer les scores par catégorie
+        Object.entries(answers).forEach(([questionId, rating]) => {
+          const question = questions.find(q => q.id === questionId);
+          if (question && question.category) {
+            scores[question.category] += rating;
+            totalQuestions[question.category]++;
+          }
+        });
+        
+        // Convertir en pourcentage
+        const finalScores = {
+          psychology_score: Math.round((scores.psychology / (totalQuestions.psychology * 5)) * 100),
+          health_score: Math.round((scores.health / (totalQuestions.health * 5)) * 100),
+          spirituality_score: Math.round((scores.spirituality / (totalQuestions.spirituality * 5)) * 100),
+          relationships_score: Math.round((scores.relationships / (totalQuestions.relationships * 5)) * 100),
+          finances_score: Math.round((scores.finances / (totalQuestions.finances * 5)) * 100)
+        };
+        
+        // Calculer le score global
+        const overallScore = Math.round(
+          (finalScores.psychology_score + 
+           finalScores.health_score + 
+           finalScores.spirituality_score + 
+           finalScores.relationships_score + 
+           finalScores.finances_score) / 5
+        );
+        
+        // Sauvegarder dans Supabase
+        if (user) {
+          const { error } = await supabase
+            .from('user_assessments')
+            .insert({
+              user_id: user.id,
+              ...finalScores,
+              overall_score: overallScore
+            });
+            
+          if (error) {
+            throw error;
+          }
+          
+          toast.success("Évaluation enregistrée avec succès");
+        }
+        
+        // Sauvegarder dans le state local pour l'affichage
+        saveAssessment();
+        navigate('/assessment/results');
+      } catch (error) {
+        console.error('Erreur lors de la sauvegarde de l\'évaluation:', error);
+        toast.error("Une erreur est survenue lors de la sauvegarde de l'évaluation");
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -183,8 +256,8 @@ const AssessmentCategory: React.FC = () => {
               className="bg-spirit-purple hover:bg-spirit-deep-purple flex items-center gap-2 shadow-sm"
               disabled={isSubmitting}
             >
-              {nextButtonLabel}
-              <ArrowRight size={16} />
+              {isSubmitting ? "Enregistrement..." : nextButtonLabel}
+              {!isSubmitting && <ArrowRight size={16} />}
             </Button>
           </CardFooter>
         </Card>

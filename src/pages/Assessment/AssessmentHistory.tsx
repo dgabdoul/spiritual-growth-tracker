@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAssessment, Assessment } from '@/contexts/AssessmentContext';
+import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,21 +9,69 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ChevronLeft, Eye, Printer, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Assessment {
+  id: string;
+  assessment_date: string;
+  psychology_score: number;
+  health_score: number;
+  spirituality_score: number;
+  relationships_score: number;
+  finances_score: number;
+  overall_score: number;
+}
 
 const AssessmentHistory: React.FC = () => {
   const navigate = useNavigate();
-  const { assessmentHistory } = useAssessment();
+  const { user } = useAuth();
+  const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [selectedAssessment, setSelectedAssessment] = useState<Assessment | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserAssessments = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('user_assessments')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('assessment_date', { ascending: false });
+
+        if (error) throw error;
+        if (data) {
+          setAssessments(data);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des évaluations:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserAssessments();
+  }, [user]);
 
   const handleViewDetails = (assessment: Assessment) => {
     setSelectedAssessment(assessment);
-    // Alternative: navigate to a detail view
-    // navigate(`/assessment/history/${assessment.id}`);
   };
 
   const handlePrint = (assessment: Assessment) => {
     // Store the assessment to print in localStorage
-    localStorage.setItem('printAssessment', JSON.stringify(assessment));
+    localStorage.setItem('printAssessment', JSON.stringify({
+      id: assessment.id,
+      date: assessment.assessment_date,
+      scores: {
+        psychology: assessment.psychology_score,
+        health: assessment.health_score,
+        spirituality: assessment.spirituality_score,
+        relationships: assessment.relationships_score,
+        finances: assessment.finances_score
+      },
+      overallScore: assessment.overall_score
+    }));
     
     // Open print view in new tab
     const printWindow = window.open('/assessment/print', '_blank');
@@ -40,18 +88,14 @@ const AssessmentHistory: React.FC = () => {
     // Create CSV content
     let csvContent = "Catégorie,Score\n";
     
-    Object.entries(assessment.scores).forEach(([category, score]) => {
-      const categoryName = 
-        category === 'psychology' ? 'Psychologie' :
-        category === 'health' ? 'Santé' :
-        category === 'spirituality' ? 'Spiritualité' :
-        category === 'relationships' ? 'Relations' : 'Finances';
-        
-      csvContent += `${categoryName},${score}\n`;
-    });
+    csvContent += `Psychologie,${assessment.psychology_score}\n`;
+    csvContent += `Santé,${assessment.health_score}\n`;
+    csvContent += `Spiritualité,${assessment.spirituality_score}\n`;
+    csvContent += `Relations,${assessment.relationships_score}\n`;
+    csvContent += `Finances,${assessment.finances_score}\n`;
     
-    csvContent += `\nScore Global,${assessment.overallScore}\n`;
-    csvContent += `\nDate,${new Date(assessment.date).toLocaleDateString('fr-FR')}\n`;
+    csvContent += `\nScore Global,${assessment.overall_score}\n`;
+    csvContent += `\nDate,${format(new Date(assessment.assessment_date), 'dd/MM/yyyy', { locale: fr })}\n`;
     
     // Create and trigger download
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -59,13 +103,29 @@ const AssessmentHistory: React.FC = () => {
     const url = URL.createObjectURL(blob);
     
     link.setAttribute('href', url);
-    link.setAttribute('download', `evaluation_${format(new Date(assessment.date), 'yyyy-MM-dd')}.csv`);
+    link.setAttribute('download', `evaluation_${format(new Date(assessment.assessment_date), 'yyyy-MM-dd')}.csv`);
     link.style.visibility = 'hidden';
     
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-spirit-purple mx-auto"></div>
+              <p className="mt-4 text-gray-600">Chargement de l'historique...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -91,7 +151,7 @@ const AssessmentHistory: React.FC = () => {
             <CardTitle>Vos évaluations</CardTitle>
           </CardHeader>
           <CardContent>
-            {assessmentHistory.length === 0 ? (
+            {assessments.length === 0 ? (
               <div className="text-center py-10">
                 <p className="text-gray-500">Vous n'avez pas encore réalisé d'évaluation.</p>
                 <Button 
@@ -117,19 +177,19 @@ const AssessmentHistory: React.FC = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {assessmentHistory.slice().reverse().map((assessment) => (
+                    {assessments.map((assessment) => (
                       <TableRow key={assessment.id}>
                         <TableCell className="font-medium">
-                          {format(new Date(assessment.date), 'dd MMMM yyyy', { locale: fr })}
+                          {format(new Date(assessment.assessment_date), 'dd MMMM yyyy', { locale: fr })}
                         </TableCell>
                         <TableCell className="font-bold text-spirit-purple">
-                          {assessment.overallScore}%
+                          {assessment.overall_score}%
                         </TableCell>
-                        <TableCell>{assessment.scores.psychology}%</TableCell>
-                        <TableCell>{assessment.scores.health}%</TableCell>
-                        <TableCell>{assessment.scores.spirituality}%</TableCell>
-                        <TableCell>{assessment.scores.relationships}%</TableCell>
-                        <TableCell>{assessment.scores.finances}%</TableCell>
+                        <TableCell>{assessment.psychology_score}%</TableCell>
+                        <TableCell>{assessment.health_score}%</TableCell>
+                        <TableCell>{assessment.spirituality_score}%</TableCell>
+                        <TableCell>{assessment.relationships_score}%</TableCell>
+                        <TableCell>{assessment.finances_score}%</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
                             <Button 
@@ -171,37 +231,37 @@ const AssessmentHistory: React.FC = () => {
           <Card className="mb-8">
             <CardHeader>
               <CardTitle>
-                Détails de l'évaluation du {format(new Date(selectedAssessment.date), 'dd MMMM yyyy', { locale: fr })}
+                Détails de l'évaluation du {format(new Date(selectedAssessment.assessment_date), 'dd MMMM yyyy', { locale: fr })}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h3 className="font-medium mb-2">Score global</h3>
-                  <div className="text-4xl font-bold text-spirit-deep-purple">{selectedAssessment.overallScore}%</div>
+                  <div className="text-4xl font-bold text-spirit-deep-purple">{selectedAssessment.overall_score}%</div>
                 </div>
                 <div>
                   <h3 className="font-medium mb-2">Scores par catégorie</h3>
                   <ul className="space-y-2">
                     <li className="flex justify-between">
                       <span>Psychologie</span>
-                      <span className="font-medium">{selectedAssessment.scores.psychology}%</span>
+                      <span className="font-medium">{selectedAssessment.psychology_score}%</span>
                     </li>
                     <li className="flex justify-between">
                       <span>Santé</span>
-                      <span className="font-medium">{selectedAssessment.scores.health}%</span>
+                      <span className="font-medium">{selectedAssessment.health_score}%</span>
                     </li>
                     <li className="flex justify-between">
                       <span>Spiritualité</span>
-                      <span className="font-medium">{selectedAssessment.scores.spirituality}%</span>
+                      <span className="font-medium">{selectedAssessment.spirituality_score}%</span>
                     </li>
                     <li className="flex justify-between">
                       <span>Relations</span>
-                      <span className="font-medium">{selectedAssessment.scores.relationships}%</span>
+                      <span className="font-medium">{selectedAssessment.relationships_score}%</span>
                     </li>
                     <li className="flex justify-between">
                       <span>Finances</span>
-                      <span className="font-medium">{selectedAssessment.scores.finances}%</span>
+                      <span className="font-medium">{selectedAssessment.finances_score}%</span>
                     </li>
                   </ul>
                 </div>

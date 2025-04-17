@@ -53,22 +53,64 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          email: string | null
           id: string
+          role: string
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id: string
+          role?: string
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id?: string
+          role?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_assessments: {
+        Row: {
+          assessment_date: string | null
+          finances_score: number | null
+          health_score: number | null
+          id: string
+          overall_score: number | null
+          psychology_score: number | null
+          relationships_score: number | null
+          spirituality_score: number | null
+          user_id: string
+        }
+        Insert: {
+          assessment_date?: string | null
+          finances_score?: number | null
+          health_score?: number | null
+          id?: string
+          overall_score?: number | null
+          psychology_score?: number | null
+          relationships_score?: number | null
+          spirituality_score?: number | null
+          user_id: string
+        }
+        Update: {
+          assessment_date?: string | null
+          finances_score?: number | null
+          health_score?: number | null
+          id?: string
+          overall_score?: number | null
+          psychology_score?: number | null
+          relationships_score?: number | null
+          spirituality_score?: number | null
+          user_id?: string
         }
         Relationships: []
       }
