@@ -25,6 +25,7 @@ import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
 import UsersManagement from "./pages/Admin/UsersManagement";
 import Statistics from "./pages/Admin/Statistics";
+import QuranSearchPage from "./pages/QuranSearchPage";
 
 const queryClient = new QueryClient();
 
@@ -106,6 +107,7 @@ function App() {
         <Route path="/support" element={<SupportContactPage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
         <Route path="/terms" element={<TermsOfServicePage />} />
+        <Route path="/quran-search" element={<QuranSearchPage />} />
         
         {/* Protected Routes */}
         <Route path="/dashboard" element={

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { EnvelopeIcon, ArrowLeftIcon, CheckIcon } from 'lucide-react';
+import { Mail, ArrowLeft, Check } from 'lucide-react';
 
 const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -45,7 +45,7 @@ const ForgotPasswordPage: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
-                  <EnvelopeIcon className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     id="email"
                     type="email"
@@ -65,7 +65,7 @@ const ForgotPasswordPage: React.FC = () => {
             <div className="text-center space-y-4">
               <div className="flex justify-center">
                 <div className="rounded-full bg-green-100 p-2">
-                  <CheckIcon className="h-6 w-6 text-green-600" />
+                  <Check className="h-6 w-6 text-green-600" />
                 </div>
               </div>
               <h3 className="text-lg font-medium">Email envoyé</h3>
@@ -77,7 +77,7 @@ const ForgotPasswordPage: React.FC = () => {
         </CardContent>
         <CardFooter className="flex justify-center">
           <Link to="/login" className="flex items-center text-sm text-gray-600 hover:text-gray-900">
-            <ArrowLeftIcon className="mr-1 h-3 w-3" /> Retour à la connexion
+            <ArrowLeft className="mr-1 h-3 w-3" /> Retour à la connexion
           </Link>
         </CardFooter>
       </Card>
