@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,36 +56,20 @@ const QuranSearchPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<QuranSearchResult | null>(null);
   const [language, setLanguage] = useState<'en' | 'fr'>('fr'); // Default to French
-  const [audioEditions, setAudioEditions] = useState<AudioEdition[]>([]);
-  const [selectedAudioEdition, setSelectedAudioEdition] = useState<string>('');
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const [currentlyPlaying, setCurrentlyPlaying] = useState<number | null>(null);
   const [expandedVerses, setExpandedVerses] = useState<Set<number>>(new Set());
   const [audioProgress, setAudioProgress] = useState<number>(0);
   const [audioDuration, setAudioDuration] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [audioBitrate, setAudioBitrate] = useState<'64' | '128'>('128'); // Default to 128kbps
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const progressIntervalRef = useRef<number | null>(null);
   const { toast } = useToast();
 
-  // Fetch audio editions on component mount
-  React.useEffect(() => {
-    fetchAudioEditions();
-  }, []);
-
-  const fetchAudioEditions = async () => {
-    try {
-      const response = await fetch(`https://api.alquran.cloud/v1/edition?format=audio&language=${language}&type=versebyverse`);
-      const data: AudioApiResponse = await response.json();
-      
-      if (data.code === 200 && data.data && data.data.length > 0) {
-        setAudioEditions(data.data);
-        setSelectedAudioEdition(data.data[0].identifier); // Default to first audio edition
-      }
-    } catch (error) {
-      console.error('Error fetching audio editions:', error);
-    }
-  };
+  // Alafasy reciter is now fixed, so we don't need to fetch audio editions
+  const reciterIdentifier = 'ar.alafasy';
+  const reciterName = 'Mishary bin Rashid Alafasy';
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,9 +119,6 @@ const QuranSearchPage: React.FC = () => {
     const newLang = language === 'en' ? 'fr' : 'en';
     setLanguage(newLang);
     
-    // Fetch audio editions for the new language
-    fetchAudioEditions();
-    
     if (searchResults) {
       // Re-fetch results in the new language if we already have results
       handleSearch(new Event('submit') as any);
@@ -184,17 +166,6 @@ const QuranSearchPage: React.FC = () => {
   };
 
   const playAudio = async (surahNumber: number, verseNumber: number, index: number) => {
-    if (!selectedAudioEdition) {
-      toast({
-        title: language === 'en' ? "No audio edition selected" : "Aucune édition audio sélectionnée",
-        description: language === 'en' 
-          ? "Please select an audio edition first" 
-          : "Veuillez d'abord sélectionner une édition audio",
-        variant: "default",
-      });
-      return;
-    }
-
     // Stop current audio if playing
     if (audioRef.current) {
       audioRef.current.pause();
@@ -209,8 +180,13 @@ const QuranSearchPage: React.FC = () => {
     setCurrentlyPlaying(index);
 
     try {
-      // Format URL for verse audio
-      const audioUrl = `https://cdn.islamic.network/quran/audio/${selectedAudioEdition}/${surahNumber}${verseNumber.toString().padStart(3, '0')}.mp3`;
+      // Format ayah number for the new API (sourate:verset format)
+      const ayahNumber = `${surahNumber}:${verseNumber}`;
+      
+      // Format URL for the Alafasy recitation using the CDN
+      // Format: https://cdn.islamic.network/quran/audio/{bitrate}/ar.alafasy/{surah}{verse_padded}.mp3
+      const paddedVerseNumber = verseNumber.toString().padStart(3, '0');
+      const audioUrl = `https://cdn.islamic.network/quran/audio/${audioBitrate}/${reciterIdentifier}/${surahNumber}${paddedVerseNumber}.mp3`;
       
       if (!audioRef.current) {
         audioRef.current = new Audio();
@@ -384,28 +360,37 @@ const QuranSearchPage: React.FC = () => {
               </Button>
             </form>
 
-            {audioEditions.length > 0 && (
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <label className="block text-sm font-medium mb-2 text-gray-700">
-                  {language === 'en' ? 'Select Audio Recitation:' : 'Sélectionner une Récitation Audio:'}
-                </label>
-                <Select
-                  value={selectedAudioEdition}
-                  onValueChange={setSelectedAudioEdition}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={language === 'en' ? "Select a reciter" : "Sélectionnez un récitateur"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {audioEditions.map((edition) => (
-                      <SelectItem key={edition.identifier} value={edition.identifier}>
-                        {edition.englishName} ({edition.identifier})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium mb-1 text-gray-700">
+                    {language === 'en' ? 'Recitation by:' : 'Récitation par:'}
+                  </p>
+                  <p className="text-sm text-spirit-deep-purple font-semibold">{reciterName}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">{language === 'en' ? 'Audio Quality:' : 'Qualité Audio:'}</span>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant={audioBitrate === '64' ? "default" : "outline"} 
+                      size="sm"
+                      className={audioBitrate === '64' ? "bg-spirit-purple hover:bg-spirit-deep-purple" : ""} 
+                      onClick={() => setAudioBitrate('64')}
+                    >
+                      64 kbps
+                    </Button>
+                    <Button 
+                      variant={audioBitrate === '128' ? "default" : "outline"} 
+                      size="sm" 
+                      className={audioBitrate === '128' ? "bg-spirit-purple hover:bg-spirit-deep-purple" : ""} 
+                      onClick={() => setAudioBitrate('128')}
+                    >
+                      128 kbps
+                    </Button>
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
           </CardContent>
         </Card>
 
@@ -476,76 +461,72 @@ const QuranSearchPage: React.FC = () => {
                         <div className="px-6 pb-6">
                           <Separator className="my-3" />
 
-                          {/* Audio controls - Improved version */}
-                          {selectedAudioEdition && (
-                            <div className="mb-4 p-3 rounded-lg bg-spirit-soft-purple/30">
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      if (currentlyPlaying === index) {
-                                        togglePlayPause(index);
-                                      } else {
-                                        playAudio(match.surah.number, match.numberInSurah, index);
-                                      }
-                                    }}
-                                    disabled={isLoadingAudio && currentlyPlaying === index}
-                                    className="h-10 w-10 rounded-full bg-spirit-purple text-white hover:bg-spirit-deep-purple"
-                                  >
-                                    {isLoadingAudio && currentlyPlaying === index ? (
-                                      <div className="h-5 w-5 rounded-full border-2 border-t-transparent border-white animate-spin" />
-                                    ) : currentlyPlaying === index && isPlaying ? (
-                                      <Pause className="h-5 w-5" />
-                                    ) : (
-                                      <Play className="h-5 w-5 ml-0.5" />
-                                    )}
-                                  </Button>
-                                  <div>
-                                    <p className="text-sm font-medium text-spirit-deep-purple">
-                                      {language === 'en' ? 'Recitation' : 'Récitation'}
-                                    </p>
-                                    <p className="text-xs text-gray-600">
-                                      {audioEditions.find(ed => ed.identifier === selectedAudioEdition)?.englishName || selectedAudioEdition}
-                                    </p>
-                                  </div>
+                          {/* Audio controls - For Alafasy recitation */}
+                          <div className="mb-4 p-3 rounded-lg bg-spirit-soft-purple/30">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (currentlyPlaying === index) {
+                                      togglePlayPause(index);
+                                    } else {
+                                      playAudio(match.surah.number, match.numberInSurah, index);
+                                    }
+                                  }}
+                                  disabled={isLoadingAudio && currentlyPlaying === index}
+                                  className="h-10 w-10 rounded-full bg-spirit-purple text-white hover:bg-spirit-deep-purple"
+                                >
+                                  {isLoadingAudio && currentlyPlaying === index ? (
+                                    <div className="h-5 w-5 rounded-full border-2 border-t-transparent border-white animate-spin" />
+                                  ) : currentlyPlaying === index && isPlaying ? (
+                                    <Pause className="h-5 w-5" />
+                                  ) : (
+                                    <Play className="h-5 w-5 ml-0.5" />
+                                  )}
+                                </Button>
+                                <div>
+                                  <p className="text-sm font-medium text-spirit-deep-purple">
+                                    {language === 'en' ? 'Recitation' : 'Récitation'}
+                                  </p>
+                                  <p className="text-xs text-gray-600">{reciterName}</p>
                                 </div>
-                                {currentlyPlaying === index && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      stopAudio();
-                                    }}
-                                    className="h-8 w-8 rounded-full hover:bg-red-100 text-red-500"
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                )}
                               </div>
-
                               {currentlyPlaying === index && (
-                                <div className="mt-2">
-                                  <div 
-                                    className="relative h-2 bg-gray-200 rounded-full cursor-pointer mb-1"
-                                    onClick={seekAudio}
-                                  >
-                                    <div 
-                                      className="absolute top-0 left-0 h-full bg-spirit-purple rounded-full"
-                                      style={{ width: `${audioDuration ? (audioProgress / audioDuration) * 100 : 0}%` }}
-                                    />
-                                  </div>
-                                  <div className="flex justify-between text-xs text-gray-600">
-                                    <span>{formatTime(audioProgress)}</span>
-                                    <span>{formatTime(audioDuration)}</span>
-                                  </div>
-                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    stopAudio();
+                                  }}
+                                  className="h-8 w-8 rounded-full hover:bg-red-100 text-red-500"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
                               )}
                             </div>
-                          )}
+
+                            {currentlyPlaying === index && (
+                              <div className="mt-2">
+                                <div 
+                                  className="relative h-2 bg-gray-200 rounded-full cursor-pointer mb-1"
+                                  onClick={seekAudio}
+                                >
+                                  <div 
+                                    className="absolute top-0 left-0 h-full bg-spirit-purple rounded-full"
+                                    style={{ width: `${audioDuration ? (audioProgress / audioDuration) * 100 : 0}%` }}
+                                  />
+                                </div>
+                                <div className="flex justify-between text-xs text-gray-600">
+                                  <span>{formatTime(audioProgress)}</span>
+                                  <span>{formatTime(audioDuration)}</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
 
                           <Tabs defaultValue="translation" className="w-full">
                             <TabsList className="mb-4">
