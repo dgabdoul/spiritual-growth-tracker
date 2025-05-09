@@ -1,16 +1,16 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, Book, Globe, Volume2, Pause, ChevronUp, ChevronDown } from 'lucide-react';
+import { Search, Book, Globe, Volume2, Pause, ChevronUp, ChevronDown, Play, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Progress } from '@/components/ui/progress';
 
 interface QuranSearchResult {
   count: number;
@@ -60,7 +60,11 @@ const QuranSearchPage: React.FC = () => {
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const [currentlyPlaying, setCurrentlyPlaying] = useState<number | null>(null);
   const [expandedVerses, setExpandedVerses] = useState<Set<number>>(new Set());
+  const [audioProgress, setAudioProgress] = useState<number>(0);
+  const [audioDuration, setAudioDuration] = useState<number>(0);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const progressIntervalRef = useRef<number | null>(null);
   const { toast } = useToast();
 
   // Fetch audio editions on component mount
@@ -149,6 +153,36 @@ const QuranSearchPage: React.FC = () => {
     setExpandedVerses(newExpandedVerses);
   };
 
+  const formatTime = (seconds: number): string => {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const stopAudio = (): void => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setIsPlaying(false);
+      setCurrentlyPlaying(null);
+      setAudioProgress(0);
+    }
+  };
+
+  const seekAudio = (e: React.MouseEvent<HTMLDivElement>): void => {
+    if (!audioRef.current || !audioDuration) return;
+    
+    const progressBar = e.currentTarget;
+    const clickPosition = e.clientX - progressBar.getBoundingClientRect().left;
+    const progressBarWidth = progressBar.clientWidth;
+    const seekPercentage = clickPosition / progressBarWidth;
+    const seekTime = audioDuration * seekPercentage;
+    
+    audioRef.current.currentTime = seekTime;
+    setAudioProgress(seekTime);
+  };
+
   const playAudio = async (surahNumber: number, verseNumber: number, index: number) => {
     if (!selectedAudioEdition) {
       toast({
@@ -164,6 +198,7 @@ const QuranSearchPage: React.FC = () => {
     // Stop current audio if playing
     if (audioRef.current) {
       audioRef.current.pause();
+      setIsPlaying(false);
       if (currentlyPlaying === index) {
         setCurrentlyPlaying(null);
         return;
@@ -184,16 +219,29 @@ const QuranSearchPage: React.FC = () => {
       audioRef.current.src = audioUrl;
       audioRef.current.onloadedmetadata = () => {
         setIsLoadingAudio(false);
+        setAudioDuration(audioRef.current?.duration || 0);
         audioRef.current?.play();
+        setIsPlaying(true);
       };
       
       audioRef.current.onended = () => {
         setCurrentlyPlaying(null);
+        setIsPlaying(false);
+        setAudioProgress(0);
+      };
+
+      audioRef.current.onpause = () => {
+        setIsPlaying(false);
+      };
+
+      audioRef.current.onplay = () => {
+        setIsPlaying(true);
       };
       
       audioRef.current.onerror = () => {
         setIsLoadingAudio(false);
         setCurrentlyPlaying(null);
+        setIsPlaying(false);
         toast({
           title: language === 'en' ? "Audio Error" : "Erreur Audio",
           description: language === 'en' 
@@ -206,6 +254,7 @@ const QuranSearchPage: React.FC = () => {
       console.error('Error playing audio:', error);
       setIsLoadingAudio(false);
       setCurrentlyPlaying(null);
+      setIsPlaying(false);
       toast({
         title: language === 'en' ? "Audio Error" : "Erreur Audio",
         description: language === 'en' 
@@ -213,6 +262,16 @@ const QuranSearchPage: React.FC = () => {
           : "Une erreur est survenue lors de la lecture audio",
         variant: "destructive",
       });
+    }
+  };
+
+  const togglePlayPause = (index: number) => {
+    if (currentlyPlaying === index && audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
     }
   };
 
@@ -226,6 +285,39 @@ const QuranSearchPage: React.FC = () => {
     ];
     return gradients[index % gradients.length];
   };
+
+  // Clean up audio and intervals when component unmounts
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+    };
+  }, []);
+
+  // Update audio progress when playing
+  useEffect(() => {
+    if (isPlaying && audioRef.current) {
+      progressIntervalRef.current = window.setInterval(() => {
+        if (audioRef.current) {
+          setAudioProgress(audioRef.current.currentTime);
+          setAudioDuration(audioRef.current.duration || 0);
+        }
+      }, 100);
+    } else if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
+
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+    };
+  }, [isPlaying]);
 
   return (
     <div className="container mx-auto py-8 px-4 min-h-screen bg-gradient-to-b from-white to-gray-50">
@@ -372,27 +464,6 @@ const QuranSearchPage: React.FC = () => {
                           </div>
                         </div>
                         <div className="flex items-center">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              playAudio(match.surah.number, match.numberInSurah, index);
-                            }}
-                            disabled={isLoadingAudio && currentlyPlaying === index}
-                            className="mr-2"
-                          >
-                            {isLoadingAudio && currentlyPlaying === index ? (
-                              <div className="flex items-center">
-                                <span className="animate-spin mr-2">⏳</span>
-                                {language === 'en' ? 'Loading...' : 'Chargement...'}
-                              </div>
-                            ) : currentlyPlaying === index ? (
-                              <Pause className="h-4 w-4 mr-1 text-spirit-deep-purple" />
-                            ) : (
-                              <Volume2 className="h-4 w-4 mr-1 text-spirit-deep-purple" />
-                            )}
-                          </Button>
                           {expandedVerses.has(index) ? (
                             <ChevronUp className="h-5 w-5 text-gray-600" />
                           ) : (
@@ -404,6 +475,78 @@ const QuranSearchPage: React.FC = () => {
                       {expandedVerses.has(index) && (
                         <div className="px-6 pb-6">
                           <Separator className="my-3" />
+
+                          {/* Audio controls - Improved version */}
+                          {selectedAudioEdition && (
+                            <div className="mb-4 p-3 rounded-lg bg-spirit-soft-purple/30">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (currentlyPlaying === index) {
+                                        togglePlayPause(index);
+                                      } else {
+                                        playAudio(match.surah.number, match.numberInSurah, index);
+                                      }
+                                    }}
+                                    disabled={isLoadingAudio && currentlyPlaying === index}
+                                    className="h-10 w-10 rounded-full bg-spirit-purple text-white hover:bg-spirit-deep-purple"
+                                  >
+                                    {isLoadingAudio && currentlyPlaying === index ? (
+                                      <div className="h-5 w-5 rounded-full border-2 border-t-transparent border-white animate-spin" />
+                                    ) : currentlyPlaying === index && isPlaying ? (
+                                      <Pause className="h-5 w-5" />
+                                    ) : (
+                                      <Play className="h-5 w-5 ml-0.5" />
+                                    )}
+                                  </Button>
+                                  <div>
+                                    <p className="text-sm font-medium text-spirit-deep-purple">
+                                      {language === 'en' ? 'Recitation' : 'Récitation'}
+                                    </p>
+                                    <p className="text-xs text-gray-600">
+                                      {audioEditions.find(ed => ed.identifier === selectedAudioEdition)?.englishName || selectedAudioEdition}
+                                    </p>
+                                  </div>
+                                </div>
+                                {currentlyPlaying === index && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      stopAudio();
+                                    }}
+                                    className="h-8 w-8 rounded-full hover:bg-red-100 text-red-500"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                )}
+                              </div>
+
+                              {currentlyPlaying === index && (
+                                <div className="mt-2">
+                                  <div 
+                                    className="relative h-2 bg-gray-200 rounded-full cursor-pointer mb-1"
+                                    onClick={seekAudio}
+                                  >
+                                    <div 
+                                      className="absolute top-0 left-0 h-full bg-spirit-purple rounded-full"
+                                      style={{ width: `${audioDuration ? (audioProgress / audioDuration) * 100 : 0}%` }}
+                                    />
+                                  </div>
+                                  <div className="flex justify-between text-xs text-gray-600">
+                                    <span>{formatTime(audioProgress)}</span>
+                                    <span>{formatTime(audioDuration)}</span>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
                           <Tabs defaultValue="translation" className="w-full">
                             <TabsList className="mb-4">
                               <TabsTrigger value="translation" className="text-sm">
