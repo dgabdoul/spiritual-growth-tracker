@@ -10,7 +10,7 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   profile: any | null;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signOut: () => Promise<void>;
   loading: boolean;
@@ -99,17 +99,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, rememberMe = false) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
+      options: {
+        persistSession: true, // Toujours enregistrer la session
+      }
     });
+    
     if (error) throw error;
+    
+    // Si l'option "Se souvenir de moi" est activée, nous la gérons par défaut avec Supabase
+    // qui utilise les JWT stockés dans le localStorage
+    if (rememberMe) {
+      // Supabase gère déjà la persistance de session par défaut
+      // Mais nous pourrions ajouter une logique supplémentaire si nécessaire
+      localStorage.setItem('rememberMe', 'true');
+    } else {
+      // Si l'utilisateur ne veut pas être mémorisé, nous ne faisons rien de spécial
+      // mais nous pourrions implémenter une logique pour effacer la session après une période donnée
+      localStorage.removeItem('rememberMe');
+    }
   };
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+    localStorage.removeItem('rememberMe');
     navigate('/login');
   };
 

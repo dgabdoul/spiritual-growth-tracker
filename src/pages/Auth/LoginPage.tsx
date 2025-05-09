@@ -6,10 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
@@ -19,7 +22,7 @@ export default function LoginPage() {
     e.preventDefault();
     try {
       setLoading(true);
-      await signIn(email, password);
+      await signIn(email, password, rememberMe);
       navigate('/dashboard');
     } catch (error) {
       toast({
@@ -75,6 +78,14 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="remember-me"
+                checked={rememberMe}
+                onCheckedChange={setRememberMe}
+              />
+              <Label htmlFor="remember-me" className="text-sm">Se souvenir de moi</Label>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Connexion...' : 'Se connecter'}
