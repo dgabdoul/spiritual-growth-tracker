@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -11,24 +12,6 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
-
-const testimonials = [
-  {
-    name: "Thomas L.",
-    text: "SpiritTrack m'a permis de prendre conscience de mes points forts et faibles dans tous les aspects de ma vie.",
-    role: "Entrepreneur"
-  },
-  {
-    name: "Marie K.",
-    text: "Un outil précieux pour suivre mon évolution personnelle et spirituelle mois après mois.",
-    role: "Coach de vie"
-  },
-  {
-    name: "Jean D.",
-    text: "Je recommande vivement cette plateforme à tous ceux qui cherchent à s'améliorer de façon globale.",
-    role: "Thérapeute"
-  }
-];
 
 const features = [
   {
@@ -134,44 +117,7 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
       
-      {/* Testimonials Carousel with Islamic Background */}
-      <section className="py-16 px-6 bg-gray-50" 
-        style={{
-          backgroundImage: "url('https://img.freepik.com/vecteurs-libre/fond-motif-islamique-elegante-couleur-or_1017-30666.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center"
-        }}>
-        <div className="max-w-5xl mx-auto bg-white/90 p-8 rounded-xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4 text-gradient">Ce que disent nos utilisateurs</h2>
-            <p className="text-gray-600">Découvrez les expériences de personnes qui ont transformé leur vie avec SpiritTrack</p>
-          </div>
-          
-          <Carousel className="mx-auto">
-            <CarouselContent>
-              {testimonials.map((testimonial, index) => (
-                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                  <Card className="border-none shadow-md">
-                    <CardContent className="p-6">
-                      <div className="space-y-4">
-                        <p className="text-gray-600 italic">"{testimonial.text}"</p>
-                        <div className="font-medium">
-                          <p className="text-spirit-purple">{testimonial.name}</p>
-                          <p className="text-gray-500 text-sm">{testimonial.role}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="left-0" />
-            <CarouselNext className="right-0" />
-          </Carousel>
-        </div>
-      </section>
-      
-      {/* CTA Section - Change background from red to white */}
+      {/* CTA Section - White background */}
       <section className="py-20 px-6 bg-white text-gray-900">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6">Prêt à commencer votre parcours ?</h2>
