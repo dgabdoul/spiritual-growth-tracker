@@ -31,6 +31,7 @@ import QuranSearchPage from "./pages/QuranSearchPage";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import EmailCampaigns from "./pages/Admin/EmailCampaigns";
 import IntegrationsPage from "./pages/Admin/IntegrationsPage";
+import RecommendationPage from "./pages/Assessment/RecommendationPage";
 
 const queryClient = new QueryClient();
 
@@ -140,6 +141,12 @@ function App() {
             </ProtectedRoute>
           } />
           
+          <Route path="/assessment/recommendations" element={
+            <ProtectedRoute>
+              <RecommendationPage />
+            </ProtectedRoute>
+          } />
+          
           <Route path="/assessment/history" element={
             <ProtectedRoute>
               <AssessmentHistory />
@@ -203,7 +210,7 @@ function App() {
             </AssessmentProvider>
           </AuthProvider>
         </TooltipProvider>
-      </QueryClient Provider>
+      </QueryClientProvider>
     </BrowserRouter>
   );
 }
