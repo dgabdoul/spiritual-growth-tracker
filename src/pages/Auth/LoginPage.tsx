@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -8,28 +8,43 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { toast } from '@/components/ui/sonner';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
+
+  useEffect(() => {
+    // Si l'utilisateur est déjà connecté, redirigez vers le tableau de bord
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error("Veuillez remplir tous les champs requis");
+      return;
+    }
+    
     try {
       setLoading(true);
       await signIn(email, password, rememberMe);
+      toast.success("Connexion réussie");
       navigate('/dashboard');
     } catch (error) {
-      toast({
-        title: "Erreur de connexion",
-        description: error instanceof Error ? error.message : "Une erreur est survenue",
-        variant: "destructive",
-      });
+      console.error("Erreur de connexion:", error);
+      toast.error(
+        "Erreur de connexion", 
+        { description: error instanceof Error ? error.message : "Vérifiez vos identifiants" }
+      );
     } finally {
       setLoading(false);
     }

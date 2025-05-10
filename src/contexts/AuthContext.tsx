@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,20 +32,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast: uiToast } = useToast();
 
   useEffect(() => {
+    // Configurer l'écouteur d'événements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        
+        // Utiliser setTimeout pour éviter les problèmes de deadlock
         if (session?.user) {
           setTimeout(async () => {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', session.user.id)
-              .single();
+            try {
+              const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .maybeSingle();
+                
+              if (error) {
+                console.error("Erreur lors de la récupération du profil:", error);
+                return;
+              }
               
-            setProfile(profile);
-            setIsAdmin(profile?.role === 'admin');
+              setProfile(profile);
+              setIsAdmin(profile?.role === 'admin');
+            } catch (error) {
+              console.error("Exception lors de la récupération du profil:", error);
+            }
           }, 0);
         } else {
           setProfile(null);
@@ -53,21 +66,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
+    // Récupérer la session actuelle
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
       if (session?.user) {
         supabase
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
-          .single()
-          .then(({ data }) => {
+          .maybeSingle()
+          .then(({ data, error }) => {
+            if (error) {
+              console.error("Erreur lors de la récupération du profil:", error);
+              return;
+            }
+            
             setProfile(data);
             setIsAdmin(data?.role === 'admin');
+            setLoading(false);
           });
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => {
@@ -83,14 +105,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data: {
           display_name: displayName,
         },
-        // This is the key change - disable email verification
+        // Désactiver la vérification par email
         emailRedirectTo: `${window.location.origin}/login`,
       },
     });
     
     if (error) throw error;
     
-    // If signup was successful but we're waiting for email confirmation
+    // Si l'inscription a réussi mais qu'on attend la confirmation par email
     if (data.user && !data.session) {
       toast.success("Compte créé avec succès", {
         description: "Vous pouvez maintenant vous connecter directement."
@@ -99,31 +121,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string, password: string, rememberMe = false) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-    
-    if (error) throw error;
-    
-    // Si l'option "Se souvenir de moi" est activée, nous la gérons par défaut avec Supabase
-    // qui utilise les JWT stockés dans le localStorage
-    if (rememberMe) {
-      // Supabase gère déjà la persistance de session par défaut
-      // Mais nous pourrions ajouter une logique supplémentaire si nécessaire
-      localStorage.setItem('rememberMe', 'true');
-    } else {
-      // Si l'utilisateur ne veut pas être mémorisé, nous ne faisons rien de spécial
-      // mais nous pourrions implémenter une logique pour effacer la session après une période donnée
-      localStorage.removeItem('rememberMe');
+    try {
+      const { error, data } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) throw error;
+      
+      // Si l'option "Se souvenir de moi" est activée
+      if (rememberMe) {
+        localStorage.setItem('rememberMe', 'true');
+      } else {
+        localStorage.removeItem('rememberMe');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error("Erreur de connexion dans AuthContext:", error);
+      throw error;
     }
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-    localStorage.removeItem('rememberMe');
-    navigate('/login');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      localStorage.removeItem('rememberMe');
+      navigate('/login');
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+      throw error;
+    }
   };
 
   const requestPasswordReset = async (email: string): Promise<boolean> => {
