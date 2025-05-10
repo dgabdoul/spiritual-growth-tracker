@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -135,8 +134,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         localStorage.removeItem('rememberMe');
       }
-      
-      return data;
     } catch (error) {
       console.error("Erreur de connexion dans AuthContext:", error);
       throw error;
