@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -104,15 +105,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data: {
           display_name: displayName,
         },
-        // Désactiver la vérification par email
-        emailRedirectTo: `${window.location.origin}/login`,
+        // Remove email verification - no emailRedirectTo parameter
       },
     });
     
     if (error) throw error;
     
-    // Si l'inscription a réussi mais qu'on attend la confirmation par email
-    if (data.user && !data.session) {
+    // If signup is successful, show success message
+    if (data.user) {
       toast.success("Compte créé avec succès", {
         description: "Vous pouvez maintenant vous connecter directement."
       });
@@ -121,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string, rememberMe = false) => {
     try {
-      const { error, data } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password
       });

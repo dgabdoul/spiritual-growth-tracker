@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -172,15 +171,15 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
       
-      {/* CTA Section */}
-      <section className="py-20 px-6 bg-gradient-to-r from-spirit-purple to-spirit-deep-purple text-white">
+      {/* CTA Section - Change background from red to white */}
+      <section className="py-20 px-6 bg-white text-gray-900">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6">Prêt à commencer votre parcours ?</h2>
           <p className="text-lg mb-8 opacity-90">
             Créez votre compte aujourd'hui et prenez le contrôle de votre croissance personnelle et spirituelle.
           </p>
           <Link to="/register">
-            <Button size="lg" variant="secondary" className="bg-white text-spirit-deep-purple hover:bg-gray-100">
+            <Button size="lg" className="bg-spirit-purple hover:bg-spirit-deep-purple text-white">
               Commencer maintenant <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
