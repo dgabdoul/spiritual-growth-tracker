@@ -1,5 +1,5 @@
 
-import { Category, Assessment } from '@/contexts/AssessmentContext';
+import { Category, Assessment } from '@/contexts/assessment';
 import { toast } from '@/components/ui/use-toast';
 
 // DeepSeek API key

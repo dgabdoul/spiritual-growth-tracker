@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Header from '@/components/Header';
 import { Brain, Heart, Lightbulb, Users, Coins, ChevronRight, ArrowLeft, Loader2 } from 'lucide-react';
-import { useAssessment } from '@/contexts/AssessmentContext';
+import { useAssessment } from '@/contexts/assessment';
 import PageTransition from '@/components/PageTransition';
 import { fetchRecommendation, CategoryRecommendation } from '@/services/recommendationService';
 

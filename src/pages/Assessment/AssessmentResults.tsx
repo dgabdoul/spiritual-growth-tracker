@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Header from '@/components/Header';
 import { Brain, Heart, Lightbulb, Users, Coins, ChevronRight } from 'lucide-react';
-import { useAssessment, Category } from '@/contexts/AssessmentContext';
+import { useAssessment, Category } from '@/contexts/assessment';
 import ProgressBar from '@/components/ProgressBar';
 import PageTransition from '@/components/PageTransition';
 
