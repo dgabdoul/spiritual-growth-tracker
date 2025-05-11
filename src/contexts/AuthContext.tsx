@@ -1,10 +1,16 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { toast } from '@/components/ui/sonner';
+
+interface ProfileUpdateData {
+  display_name?: string;
+  bio?: string;
+  is_public?: boolean;
+  [key: string]: any; // Allow additional profile fields
+}
 
 interface AuthContextType {
   session: Session | null;
@@ -18,6 +24,7 @@ interface AuthContextType {
   resetPassword: (newPassword: string) => Promise<boolean>;
   validatePassword: (password: string) => { isValid: boolean; message: string };
   isAdmin: boolean;
+  updateProfile: (data: ProfileUpdateData) => Promise<void>; // Added missing method
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -96,6 +103,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       subscription.unsubscribe();
     };
   }, []);
+
+  // Add the updateProfile function
+  const updateProfile = async (data: ProfileUpdateData): Promise<void> => {
+    if (!user) throw new Error("User must be logged in to update profile");
+    
+    try {
+      // Update the local profile state optimistically
+      setProfile(currentProfile => ({
+        ...currentProfile,
+        ...data
+      }));
+      
+      // Update the profile in the database
+      const { error } = await supabase
+        .from('profiles')
+        .update(data)
+        .eq('id', user.id);
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Refresh the profile data from the database
+      const { data: updatedProfile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+        
+      if (fetchError) {
+        console.error("Error fetching updated profile:", fetchError);
+        return;
+      }
+      
+      setProfile(updatedProfile);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      throw error;
+    }
+  };
 
   const signUp = async (email: string, password: string, displayName: string) => {
     const { error, data } = await supabase.auth.signUp({
@@ -234,6 +281,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         resetPassword,
         validatePassword,
         isAdmin,
+        updateProfile,
       }}
     >
       {children}
