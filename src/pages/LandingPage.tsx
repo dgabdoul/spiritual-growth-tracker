@@ -68,12 +68,12 @@ const LandingPage: React.FC = () => {
               Évaluez votre croissance personnelle dans 5 dimensions clés et recevez des recommandations adaptées à votre parcours.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/register" prefetch="intent">
+              <Link to="/register">
                 <Button size="lg" className="bg-spirit-purple hover:bg-spirit-deep-purple text-white">
                   Commencer gratuitement <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <Link to="/login" prefetch="intent">
+              <Link to="/login">
                 <Button variant="outline" size="lg">
                   Se connecter
                 </Button>
@@ -180,16 +180,6 @@ const LandingPage: React.FC = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
-};
-
-// Dimension Card Component
-const DimensionCard = ({ icon, title, color, textColor }: { icon: React.ReactNode; title: string; color: string; textColor: string }) => {
-  return (
-    <div className={`${color} rounded-xl p-6 text-center h-full flex flex-col items-center justify-center transition-transform hover:scale-105`}>
-      <div className={`${textColor} mb-4`}>{icon}</div>
-      <h3 className={`text-xl font-semibold ${textColor}`}>{title}</h3>
     </div>
   );
 };
