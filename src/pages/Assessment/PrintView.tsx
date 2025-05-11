@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
-import { Assessment } from '@/contexts/AssessmentContext';
+import { Assessment } from '@/contexts/assessment';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Brain, Heart, Lightbulb, Users, Coins } from 'lucide-react';
@@ -89,11 +90,11 @@ const PrintView: React.FC = () => {
             <div className="text-center">
               <div className="text-4xl font-bold text-spirit-deep-purple">{assessment.overallScore}%</div>
               <div className="text-sm text-gray-600 mt-1">
-                {assessment.overallScore >= 80 
+                {Number(assessment.overallScore) >= 80 
                   ? 'Excellent' 
-                  : assessment.overallScore >= 60 
+                  : Number(assessment.overallScore) >= 60 
                   ? 'Bon' 
-                  : assessment.overallScore >= 40 
+                  : Number(assessment.overallScore) >= 40 
                   ? 'Moyen' 
                   : 'À améliorer'}
               </div>
@@ -128,11 +129,11 @@ const PrintView: React.FC = () => {
                   </TableCell>
                   <TableCell className="text-right font-medium">{score}%</TableCell>
                   <TableCell>
-                    {score >= 80 
+                    {Number(score) >= 80 
                       ? 'Excellent' 
-                      : score >= 60 
+                      : Number(score) >= 60 
                       ? 'Bon' 
-                      : score >= 40 
+                      : Number(score) >= 40 
                       ? 'Moyen' 
                       : 'À améliorer'}
                   </TableCell>
@@ -150,10 +151,10 @@ const PrintView: React.FC = () => {
         <CardContent className="text-sm">
           <ul className="list-disc pl-5 space-y-2">
             {Object.entries(assessment.scores).map(([category, score]) => {
-              if (score < 60) {
+              if (Number(score) < 60) {
                 return (
                   <li key={category} className="text-gray-700">
-                    <strong>{categoryNames[category]}</strong>: {score < 40 
+                    <strong>{categoryNames[category]}</strong>: {Number(score) < 40 
                       ? 'Nous vous recommandons de consacrer davantage de temps et d\'attention à ce domaine pour améliorer votre bien-être global.' 
                       : 'Ce domaine présente des opportunités d\'amélioration. Envisagez de mettre en place des habitudes positives pour progresser.'}
                   </li>
@@ -161,7 +162,7 @@ const PrintView: React.FC = () => {
               }
               return null;
             })}
-            {!Object.values(assessment.scores).some(score => score < 60) && (
+            {!Object.values(assessment.scores).some(score => Number(score) < 60) && (
               <li className="text-gray-700">
                 <strong>Félicitations !</strong> Vos scores sont bons dans tous les domaines. Continuez à maintenir ces bonnes pratiques pour préserver votre équilibre.
               </li>

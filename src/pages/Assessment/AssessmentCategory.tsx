@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Progress } from '@/components/ui/progress';
 import Header from '@/components/Header';
 import { ArrowLeft, ArrowRight, Brain, Heart, Lightbulb, Users, Coins, HelpCircle } from 'lucide-react';
-import { useAssessment, Category, questions } from '@/contexts/AssessmentContext';
+import { useAssessment, Category, questions } from '@/contexts/assessment';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';

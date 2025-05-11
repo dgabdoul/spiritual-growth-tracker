@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Header from '@/components/Header';
 import { Brain, Heart, Lightbulb, Users, Coins } from 'lucide-react';
-import { useAssessment, questions } from '@/contexts/AssessmentContext';
+import { useAssessment, questions } from '@/contexts/assessment';
 import { useAuth } from '@/contexts/AuthContext';
 
 const AssessmentStart: React.FC = () => {

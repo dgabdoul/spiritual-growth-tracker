@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import ProgressBar from './ProgressBar';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
-import { Category } from '@/contexts/AssessmentContext';
+import { Category } from '@/contexts/assessment';
 import { Link } from 'react-router-dom';
 
 interface CategoryCardProps {
