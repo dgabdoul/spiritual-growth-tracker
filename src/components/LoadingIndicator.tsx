@@ -5,17 +5,23 @@ import { Loader2 } from 'lucide-react';
 interface LoadingIndicatorProps {
   size?: 'sm' | 'md' | 'lg';
   message?: string;
+  minimal?: boolean;
 }
 
 const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({ 
   size = 'md', 
-  message = 'Chargement...' 
+  message = 'Chargement...', 
+  minimal = false 
 }) => {
   const sizeClasses = {
     sm: 'h-4 w-4',
     md: 'h-8 w-8',
     lg: 'h-12 w-12'
   };
+
+  if (minimal) {
+    return <Loader2 className={`${sizeClasses[size]} text-spirit-purple animate-spin`} />;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center p-4">

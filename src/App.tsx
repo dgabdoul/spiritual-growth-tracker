@@ -9,7 +9,7 @@ import { AnimatePresence } from "framer-motion";
 import { Suspense, lazy } from 'react';
 import LoadingIndicator from './components/LoadingIndicator';
 
-// Lazy-loaded Pages pour les performances
+// Lazy-loaded Pages pour les performances avec préchargement
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const LoginPage = lazy(() => import("./pages/Auth/LoginPage"));
@@ -45,14 +45,24 @@ const queryClient = new QueryClient({
   },
 });
 
-// Composant de chargement global
+// Composant de chargement subtil
 const PageLoader = () => (
-  <div className="h-screen flex items-center justify-center">
-    <LoadingIndicator size="lg" message="Chargement de la page..." />
+  <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+    <LoadingIndicator size="md" minimal={true} />
   </div>
 );
 
+// Préchargement des routes importantes
+const preloadRoutes = () => {
+  // Précharger les routes les plus fréquemment utilisées
+  import("./pages/Dashboard");
+  import("./pages/Assessment/AssessmentStart");
+};
+
 function App() {
+  // Précharger les routes importantes au démarrage
+  preloadRoutes();
+  
   // Fonctions de route protégée
   const AppRoutes = () => {
     const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
