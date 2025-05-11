@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, Heart, Star, Users, Coins, CheckCircle2, Compass } from 'lucide-react';
@@ -36,6 +36,22 @@ const features = [
   }
 ];
 
+// Extraction du composant DimensionCard pour améliorer les performances de rendu
+const DimensionCard = React.memo(({ icon, title, color, textColor }: { 
+  icon: React.ReactNode; 
+  title: string; 
+  color: string; 
+  textColor: string 
+}) => {
+  return (
+    <div className={`${color} rounded-xl p-6 text-center h-full flex flex-col items-center justify-center transition-transform hover:scale-105`}>
+      <div className={`${textColor} mb-4`}>{icon}</div>
+      <h3 className={`text-xl font-semibold ${textColor}`}>{title}</h3>
+    </div>
+  );
+});
+
+// Utilisation du lazy loading pour la LandingPage
 const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
@@ -52,12 +68,12 @@ const LandingPage: React.FC = () => {
               Évaluez votre croissance personnelle dans 5 dimensions clés et recevez des recommandations adaptées à votre parcours.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/register">
+              <Link to="/register" prefetch="intent">
                 <Button size="lg" className="bg-spirit-purple hover:bg-spirit-deep-purple text-white">
                   Commencer gratuitement <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <Link to="/login">
+              <Link to="/login" prefetch="intent">
                 <Button variant="outline" size="lg">
                   Se connecter
                 </Button>
@@ -69,6 +85,7 @@ const LandingPage: React.FC = () => {
               src="/lovable-uploads/0101b87a-45a9-40d3-92b5-b71cdf749a5a.png" 
               alt="Digital Muslim Services Illustration" 
               className="w-full h-auto object-cover"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-tr from-spirit-purple/30 to-transparent mix-blend-overlay"></div>
           </div>

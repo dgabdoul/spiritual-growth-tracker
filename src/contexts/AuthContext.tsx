@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,7 +25,7 @@ interface AuthContextType {
   resetPassword: (newPassword: string) => Promise<boolean>;
   validatePassword: (password: string) => { isValid: boolean; message: string };
   isAdmin: boolean;
-  updateProfile: (data: ProfileUpdateData) => Promise<void>; // Added missing method
+  updateProfile: (data: ProfileUpdateData) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -35,8 +36,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [profileError, setProfileError] = useState<boolean>(false);
   const navigate = useNavigate();
   const { toast: uiToast } = useToast();
+
+  // Fonction pour récupérer le profil avec gestion d'erreur améliorée
+  const fetchProfile = async (userId: string) => {
+    try {
+      // Limiter le nombre de colonnes sélectionnées pour améliorer les performances
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, display_name, email, role, avatar_url')
+        .eq('id', userId)
+        .maybeSingle();
+        
+      if (error) {
+        console.error("Erreur lors de la récupération du profil:", error);
+        setProfileError(true);
+        return null;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error("Exception lors de la récupération du profil:", error);
+      setProfileError(true);
+      return null;
+    }
+  };
 
   useEffect(() => {
     // Configurer l'écouteur d'événements d'authentification
@@ -45,27 +71,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Utiliser setTimeout pour éviter les problèmes de deadlock
-        if (session?.user) {
-          setTimeout(async () => {
-            try {
-              const { data: profile, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', session.user.id)
-                .maybeSingle();
-                
-              if (error) {
-                console.error("Erreur lors de la récupération du profil:", error);
-                return;
-              }
-              
-              setProfile(profile);
-              setIsAdmin(profile?.role === 'admin');
-            } catch (error) {
-              console.error("Exception lors de la récupération du profil:", error);
-            }
-          }, 0);
+        // Si l'utilisateur est connecté, récupérer son profil
+        if (session?.user && !profileError) {
+          const profileData = await fetchProfile(session.user.id);
+          if (profileData) {
+            setProfile(profileData);
+            setIsAdmin(profileData?.role === 'admin');
+          }
         } else {
           setProfile(null);
           setIsAdmin(false);
@@ -73,38 +85,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    // Récupérer la session actuelle
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .maybeSingle()
-          .then(({ data, error }) => {
-            if (error) {
-              console.error("Erreur lors de la récupération du profil:", error);
-              return;
-            }
-            
-            setProfile(data);
-            setIsAdmin(data?.role === 'admin');
-            setLoading(false);
-          });
-      } else {
+    // Récupérer la session actuelle avec un délai minimal
+    const initAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          const profileData = await fetchProfile(session.user.id);
+          if (profileData) {
+            setProfile(profileData);
+            setIsAdmin(profileData?.role === 'admin');
+          }
+        }
+      } catch (error) {
+        console.error("Erreur lors de l'initialisation de l'auth:", error);
+      } finally {
+        // Toujours terminer le chargement même en cas d'erreur
         setLoading(false);
       }
-    });
+    };
+
+    initAuth();
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [profileError]);
 
-  // Add the updateProfile function
   const updateProfile = async (data: ProfileUpdateData): Promise<void> => {
     if (!user) throw new Error("User must be logged in to update profile");
     
@@ -126,18 +135,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       // Refresh the profile data from the database
-      const { data: updatedProfile, error: fetchError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-        
-      if (fetchError) {
-        console.error("Error fetching updated profile:", fetchError);
-        return;
+      const profileData = await fetchProfile(user.id);
+      if (profileData) {
+        setProfile(profileData);
       }
-      
-      setProfile(updatedProfile);
     } catch (error) {
       console.error("Error updating profile:", error);
       throw error;

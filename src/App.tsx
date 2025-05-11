@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -7,43 +6,60 @@ import { AssessmentProvider } from "./contexts/assessment";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { AnimatePresence } from "framer-motion";
+import { Suspense, lazy } from 'react';
+import LoadingIndicator from './components/LoadingIndicator';
 
-// Pages
-import LandingPage from "./pages/LandingPage";
-import AboutPage from "./pages/AboutPage";
-import LoginPage from "./pages/Auth/LoginPage";
-import RegisterPage from "./pages/Auth/RegisterPage";
-import ForgotPasswordPage from "./pages/Auth/ForgotPasswordPage";
-import ResetPasswordPage from "./pages/Auth/ResetPasswordPage";
-import Dashboard from "./pages/Dashboard";
-import AssessmentStart from "./pages/Assessment/AssessmentStart";
-import AssessmentCategory from "./pages/Assessment/AssessmentCategory";
-import AssessmentResults from "./pages/Assessment/AssessmentResults";
-import AssessmentHistory from "./pages/Assessment/AssessmentHistory";
-import PrintView from "./pages/Assessment/PrintView";
-import NotFound from "./pages/NotFound";
-import SupportContactPage from "./pages/SupportContactPage";
-import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
-import TermsOfServicePage from "./pages/TermsOfServicePage";
-import UsersManagement from "./pages/Admin/UsersManagement";
-import Statistics from "./pages/Admin/Statistics";
-import QuranSearchPage from "./pages/QuranSearchPage";
-import AdminDashboard from "./pages/Admin/AdminDashboard";
-import EmailCampaigns from "./pages/Admin/EmailCampaigns";
-import IntegrationsPage from "./pages/Admin/IntegrationsPage";
-import RecommendationPage from "./pages/Assessment/RecommendationPage";
+// Lazy-loaded Pages pour les performances
+const LandingPage = lazy(() => import("./pages/LandingPage"));
+const AboutPage = lazy(() => import("./pages/AboutPage"));
+const LoginPage = lazy(() => import("./pages/Auth/LoginPage"));
+const RegisterPage = lazy(() => import("./pages/Auth/RegisterPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/Auth/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("./pages/Auth/ResetPasswordPage"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const AssessmentStart = lazy(() => import("./pages/Assessment/AssessmentStart"));
+const AssessmentCategory = lazy(() => import("./pages/Assessment/AssessmentCategory"));
+const AssessmentResults = lazy(() => import("./pages/Assessment/AssessmentResults"));
+const AssessmentHistory = lazy(() => import("./pages/Assessment/AssessmentHistory"));
+const PrintView = lazy(() => import("./pages/Assessment/PrintView"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const SupportContactPage = lazy(() => import("./pages/SupportContactPage"));
+const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
+const TermsOfServicePage = lazy(() => import("./pages/TermsOfServicePage"));
+const UsersManagement = lazy(() => import("./pages/Admin/UsersManagement"));
+const Statistics = lazy(() => import("./pages/Admin/Statistics"));
+const QuranSearchPage = lazy(() => import("./pages/QuranSearchPage"));
+const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
+const EmailCampaigns = lazy(() => import("./pages/Admin/EmailCampaigns"));
+const IntegrationsPage = lazy(() => import("./pages/Admin/IntegrationsPage"));
+const RecommendationPage = lazy(() => import("./pages/Assessment/RecommendationPage"));
 
-const queryClient = new QueryClient();
+// Optimisation des requêtes avec Tanstack Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1, // Réduire le nombre de tentatives pour éviter les requêtes infinies
+      refetchOnWindowFocus: false, // Désactiver le refetch automatique
+    },
+  },
+});
 
-// Move these components inside the App function to fix the hooks issue
+// Composant de chargement global
+const PageLoader = () => (
+  <div className="h-screen flex items-center justify-center">
+    <LoadingIndicator size="lg" message="Chargement de la page..." />
+  </div>
+);
+
 function App() {
-  // Create a function component for routes that should be wrapped with proper context
+  // Fonctions de route protégée
   const AppRoutes = () => {
     const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
       const { user, loading } = useAuth();
       
       if (loading) {
-        return <div>Loading...</div>;
+        return <PageLoader />;
       }
       
       if (!user) {
@@ -57,21 +73,21 @@ function App() {
       const { user, loading } = useAuth();
       
       if (loading) {
-        return <div className="h-screen flex items-center justify-center">Chargement...</div>;
+        return <PageLoader />;
       }
       
       if (user) {
         return <Navigate to="/dashboard" replace />;
       }
       
-      return <Navigate to="/register" replace />;
+      return <Navigate to="/landing" replace />;
     };
     
     const AdminRoute = ({ children }: { children: React.ReactNode }) => {
       const { user, loading, isAdmin } = useAuth();
       
       if (loading) {
-        return <div className="h-screen flex items-center justify-center">Chargement...</div>;
+        return <PageLoader />;
       }
       
       if (!user || !isAdmin) {
@@ -85,7 +101,7 @@ function App() {
       const { user, loading } = useAuth();
       
       if (loading) {
-        return <div className="h-screen flex items-center justify-center">Chargement...</div>;
+        return <PageLoader />;
       }
       
       if (!user) {
@@ -105,21 +121,63 @@ function App() {
           <Route path="/" element={<IndexRoute />} />
           
           {/* Public Routes */}
-          <Route path="/landing" element={<LandingPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
-          <Route path="/support" element={<SupportContactPage />} />
-          <Route path="/privacy" element={<PrivacyPolicyPage />} />
-          <Route path="/terms" element={<TermsOfServicePage />} />
-          <Route path="/quran-search" element={<QuranSearchPage />} />
+          <Route path="/landing" element={
+            <Suspense fallback={<PageLoader />}>
+              <LandingPage />
+            </Suspense>
+          } />
+          <Route path="/about" element={
+            <Suspense fallback={<PageLoader />}>
+              <AboutPage />
+            </Suspense>
+          } />
+          <Route path="/login" element={
+            <Suspense fallback={<PageLoader />}>
+              <LoginPage />
+            </Suspense>
+          } />
+          <Route path="/register" element={
+            <Suspense fallback={<PageLoader />}>
+              <RegisterPage />
+            </Suspense>
+          } />
+          <Route path="/forgot-password" element={
+            <Suspense fallback={<PageLoader />}>
+              <ForgotPasswordPage />
+            </Suspense>
+          } />
+          <Route path="/reset-password/:token" element={
+            <Suspense fallback={<PageLoader />}>
+              <ResetPasswordPage />
+            </Suspense>
+          } />
+          <Route path="/support" element={
+            <Suspense fallback={<PageLoader />}>
+              <SupportContactPage />
+            </Suspense>
+          } />
+          <Route path="/privacy" element={
+            <Suspense fallback={<PageLoader />}>
+              <PrivacyPolicyPage />
+            </Suspense>
+          } />
+          <Route path="/terms" element={
+            <Suspense fallback={<PageLoader />}>
+              <TermsOfServicePage />
+            </Suspense>
+          } />
+          <Route path="/quran-search" element={
+            <Suspense fallback={<PageLoader />}>
+              <QuranSearchPage />
+            </Suspense>
+          } />
           
           {/* Protected Routes */}
           <Route path="/dashboard" element={
             <ProtectedRoute>
-              <Dashboard />
+              <Suspense fallback={<PageLoader />}>
+                <Dashboard />
+              </Suspense>
             </ProtectedRoute>
           } />
           
@@ -192,7 +250,11 @@ function App() {
           } />
           
           {/* Catch all */}
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={
+            <Suspense fallback={<PageLoader />}>
+              <NotFound />
+            </Suspense>
+          } />
         </Routes>
       </AnimatePresence>
     );
