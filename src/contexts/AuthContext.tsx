@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,10 +44,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchProfile = async (userId: string) => {
     try {
       // Limiter le nombre de colonnes sélectionnées pour améliorer les performances
-      // Nous sélectionnons uniquement les colonnes qui existent certainement
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, display_name, email, role, avatar_url')
+        .select('id, display_name, email, role, avatar_url, bio, is_public')
         .eq('id', userId)
         .maybeSingle();
         
