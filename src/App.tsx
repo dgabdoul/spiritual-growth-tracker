@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -65,13 +66,14 @@ function App() {
   
   // Fonctions de route protégée
   const AppRoutes = () => {
+    const { user, loading } = useAuth();
+    
+    // Early return if auth is still loading to prevent render errors
+    if (loading) {
+      return <PageLoader />;
+    }
+    
     const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-      const { user, loading } = useAuth();
-      
-      if (loading) {
-        return <PageLoader />;
-      }
-      
       if (!user) {
         return <Navigate to="/login" />;
       }
@@ -80,12 +82,6 @@ function App() {
     }
     
     const IndexRoute = () => {
-      const { user, loading } = useAuth();
-      
-      if (loading) {
-        return <PageLoader />;
-      }
-      
       if (user) {
         return <Navigate to="/dashboard" replace />;
       }
@@ -94,12 +90,6 @@ function App() {
     };
     
     const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-      const { user, loading, isAdmin } = useAuth();
-      
-      if (loading) {
-        return <PageLoader />;
-      }
-      
       if (!user || !isAdmin) {
         return <Navigate to="/login" replace />;
       }
@@ -108,12 +98,6 @@ function App() {
     };
     
     const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-      const { user, loading } = useAuth();
-      
-      if (loading) {
-        return <PageLoader />;
-      }
-      
       if (!user) {
         return <Navigate to="/login" replace />;
       }
@@ -124,6 +108,9 @@ function App() {
     const PrintRoute = ({ children }: { children: React.ReactNode }) => {
       return <>{children}</>;
     };
+
+    // Fix: isAdmin is not defined, get it from useAuth
+    const { isAdmin } = useAuth();
 
     return (
       <AnimatePresence mode="wait">
