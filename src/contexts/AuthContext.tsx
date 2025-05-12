@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Limiter le nombre de colonnes sélectionnées pour améliorer les performances
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, display_name, email, role, avatar_url')
+        .select('id, display_name, email, role, avatar_url, bio, is_public')
         .eq('id', userId)
         .maybeSingle();
         
