@@ -1,11 +1,12 @@
-
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, Cell } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import Header from '@/components/Header';
-import { Brain, Heart, Lightbulb, Users, Coins, TrendingUp } from 'lucide-react';
+import { Brain, Heart, Lightbulb, Users, Coins, TrendingUp, UserCog } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 const Statistics: React.FC = () => {
   const { user } = useAuth();
@@ -57,7 +58,15 @@ const Statistics: React.FC = () => {
         <div className="max-w-6xl mx-auto space-y-8">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-gray-900">Statistiques</h1>
-            <div className="text-sm text-gray-500">Mise à jour: 12/04/2025</div>
+            <div className="flex items-center gap-4">
+              <Link to="/admin/users">
+                <Button variant="outline" className="flex items-center gap-2">
+                  <UserCog className="h-4 w-4" />
+                  Gestion des utilisateurs
+                </Button>
+              </Link>
+              <div className="text-sm text-gray-500">Mise à jour: 12/04/2025</div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
