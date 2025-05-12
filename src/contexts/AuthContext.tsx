@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,7 +7,7 @@ import { toast } from '@/components/ui/sonner';
 
 interface ProfileUpdateData {
   display_name?: string;
-  bio?: string;
+  avatar_url?: string;
   is_public?: boolean;
   [key: string]: any; // Allow additional profile fields
 }
@@ -46,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Limiter le nombre de colonnes sélectionnées pour améliorer les performances
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, display_name, email, role, avatar_url, bio, is_public')
+        .select('id, display_name, email, role, avatar_url, last_sign_in_at')
         .eq('id', userId)
         .maybeSingle();
         
