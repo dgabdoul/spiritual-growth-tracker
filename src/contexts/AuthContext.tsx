@@ -4,7 +4,7 @@ import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 interface ProfileUpdateData {
   display_name?: string;
@@ -38,20 +38,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [profileError, setProfileError] = useState<boolean>(false);
   const navigate = useNavigate();
-  const { toast: uiToast } = useToast();
 
   // Function to send webhook notifications
   const sendWebhookNotification = async (event: string, payload: any = {}) => {
     if (!user) return;
     
     try {
+      // Use type assertion to handle webhook_settings table
       const { data: settings } = await supabase
-        .from('webhook_settings')
+        .from('webhook_settings' as any)
         .select('*')
         .eq('user_id', user.id)
         .single();
         
-      if (!settings || !settings.events.includes(event)) return;
+      if (!settings || !settings.events?.includes(event)) return;
       
       const messageBody = JSON.stringify({
         event,

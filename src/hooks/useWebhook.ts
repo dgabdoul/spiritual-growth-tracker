@@ -16,11 +16,12 @@ export const useWebhook = () => {
     if (!user) return null;
     
     try {
+      // Use type casting to handle the webhook_settings table that's not in the TypeScript definitions yet
       const { data, error } = await supabase
-        .from('webhook_settings')
+        .from('webhook_settings' as any)
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
         
       if (error) {
         console.error("Error fetching webhook settings:", error);

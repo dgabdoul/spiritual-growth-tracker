@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -66,7 +67,7 @@ function App() {
   
   // Fonctions de route protégée
   const AppRoutes = () => {
-    const { user, loading } = useAuth();
+    const { user, loading, isAdmin } = useAuth();
     
     // Early return if auth is still loading to prevent render errors
     if (loading) {
@@ -108,9 +109,6 @@ function App() {
     const PrintRoute = ({ children }: { children: React.ReactNode }) => {
       return <>{children}</>;
     };
-
-    // Fix: isAdmin is not defined, get it from useAuth
-    const { isAdmin } = useAuth();
 
     return (
       <AnimatePresence mode="wait">
@@ -247,7 +245,9 @@ function App() {
           } />
           
           <Route path="/admin/webhook-settings" element={
-            <WebhookSettings />
+            <AdminRoute>
+              <WebhookSettings />
+            </AdminRoute>
           } />
           
           {/* Catch all */}

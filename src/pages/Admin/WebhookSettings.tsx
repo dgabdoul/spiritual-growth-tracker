@@ -1,17 +1,17 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 import Header from '@/components/Header';
 import PageTransition from '@/components/PageTransition';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertCircle, Send, MessageSquare, Bell } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useWebhook } from '@/hooks/useWebhook';
 
 const WebhookSettings: React.FC = () => {
   const { isAdmin, user } = useAuth();
@@ -24,13 +24,38 @@ const WebhookSettings: React.FC = () => {
     whatsapp: false,
     telegram: false
   });
+  const { getWebhookSettings } = useWebhook();
+
+  useEffect(() => {
+    // Fetch existing webhook settings when component mounts
+    if (user) {
+      const loadSettings = async () => {
+        const settings = await getWebhookSettings();
+        if (settings) {
+          if (settings.whatsapp_url) {
+            setWhatsappWebhook(settings.whatsapp_url);
+            setIsWhatsappEnabled(true);
+          }
+          if (settings.telegram_url) {
+            setTelegramWebhook(settings.telegram_url);
+            setIsTelegramEnabled(true);
+          }
+          if (settings.events && settings.events.length > 0) {
+            setSelectedEvents(settings.events);
+          }
+        }
+      };
+      
+      loadSettings();
+    }
+  }, [user, getWebhookSettings]);
 
   const saveWebhookSettings = async () => {
     if (!user) return;
     
     try {
       const { error } = await supabase
-        .from('webhook_settings')
+        .from('webhook_settings' as any)
         .upsert({
           user_id: user.id,
           whatsapp_url: isWhatsappEnabled ? whatsappWebhook : null,
