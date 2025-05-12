@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,6 +40,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const { toast: uiToast } = useToast();
 
+  // Function to send webhook notifications
+  const sendWebhookNotification = async (event: string, payload: any = {}) => {
+    if (!user) return;
+    
+    try {
+      const { data: settings } = await supabase
+        .from('webhook_settings')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+        
+      if (!settings || !settings.events.includes(event)) return;
+      
+      const messageBody = JSON.stringify({
+        event,
+        user_id: user.id,
+        timestamp: new Date().toISOString(),
+        ...payload
+      });
+      
+      // Send to WhatsApp if configured
+      if (settings.whatsapp_url) {
+        try {
+          await fetch(settings.whatsapp_url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            mode: 'no-cors',
+            body: messageBody
+          });
+        } catch (error) {
+          console.error("Error sending WhatsApp webhook:", error);
+        }
+      }
+      
+      // Send to Telegram if configured
+      if (settings.telegram_url) {
+        try {
+          await fetch(settings.telegram_url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            mode: 'no-cors',
+            body: messageBody
+          });
+        } catch (error) {
+          console.error("Error sending Telegram webhook:", error);
+        }
+      }
+    } catch (error) {
+      console.error("Error in webhook notification:", error);
+    }
+  };
+
   // Fonction pour récupérer le profil avec gestion d'erreur améliorée
   const fetchProfile = async (userId: string) => {
     try {
@@ -76,6 +129,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (profileData) {
             setProfile(profileData);
             setIsAdmin(profileData?.role === 'admin');
+          }
+          
+          // Send webhook notification on login
+          if (event === 'SIGNED_IN') {
+            // Use setTimeout to avoid blocking the auth flow
+            setTimeout(() => {
+              sendWebhookNotification('login', { 
+                email: session.user.email,
+                login_time: new Date().toISOString()
+              });
+            }, 0);
           }
         } else {
           setProfile(null);
@@ -138,6 +202,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (profileData) {
         setProfile(profileData);
       }
+      
+      // Send webhook notification for profile update
+      sendWebhookNotification('profile_update', { updated_fields: Object.keys(data) });
     } catch (error) {
       console.error("Error updating profile:", error);
       throw error;
@@ -163,6 +230,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       toast.success("Compte créé avec succès", {
         description: "Vous pouvez maintenant vous connecter directement."
       });
+      
+      // Send webhook notification for signup
+      sendWebhookNotification('signup', { 
+        email, 
+        display_name: displayName 
+      });
     }
   };
 
@@ -181,6 +254,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         localStorage.removeItem('rememberMe');
       }
+      
+      // Webhook notification is handled in the onAuthStateChange event
     } catch (error) {
       console.error("Erreur de connexion dans AuthContext:", error);
       throw error;
@@ -238,6 +313,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       toast.success("Mot de passe mis à jour avec succès", {
         description: "Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
+      });
+      
+      // Send webhook notification for password change
+      sendWebhookNotification('password_change', {
+        timestamp: new Date().toISOString()
       });
       
       return true;

@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -34,6 +33,7 @@ const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
 const EmailCampaigns = lazy(() => import("./pages/Admin/EmailCampaigns"));
 const IntegrationsPage = lazy(() => import("./pages/Admin/IntegrationsPage"));
 const RecommendationPage = lazy(() => import("./pages/Assessment/RecommendationPage"));
+const WebhookSettings = lazy(() => import("./pages/Admin/WebhookSettings"));
 
 // Optimisation des requêtes avec Tanstack Query
 const queryClient = new QueryClient({
@@ -244,6 +244,10 @@ function App() {
             <AdminRoute>
               <IntegrationsPage />
             </AdminRoute>
+          } />
+          
+          <Route path="/admin/webhook-settings" element={
+            <WebhookSettings />
           } />
           
           {/* Catch all */}
