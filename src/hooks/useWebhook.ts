@@ -1,5 +1,5 @@
 
-import { useEffect, useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -12,15 +12,17 @@ interface WebhookSettings {
 export const useWebhook = () => {
   const { user } = useAuth();
   
+  // Use memoization for better performance
+  const userId = useMemo(() => user?.id, [user?.id]);
+  
   const getWebhookSettings = useCallback(async (): Promise<WebhookSettings | null> => {
-    if (!user) return null;
+    if (!userId) return null;
     
     try {
-      // Use type casting to handle the webhook_settings table that's not in the TypeScript definitions yet
       const { data, error } = await supabase
         .from('webhook_settings')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .maybeSingle();
         
       if (error) {
@@ -42,10 +44,10 @@ export const useWebhook = () => {
       console.error("Exception fetching webhook settings:", error);
       return null;
     }
-  }, [user]);
+  }, [userId]);
 
   const sendWebhookNotification = useCallback(async (event: string, payload: any) => {
-    if (!user) return;
+    if (!userId) return;
     
     try {
       const settings = await getWebhookSettings();
@@ -54,42 +56,44 @@ export const useWebhook = () => {
       
       const messageBody = JSON.stringify({
         event,
-        user_id: user.id,
+        user_id: userId,
         timestamp: new Date().toISOString(),
         ...payload
       });
       
+      // Use Promise.all to send notifications in parallel
+      const promises: Promise<any>[] = [];
+      
       // Send to WhatsApp if configured
       if (settings.whatsapp_url) {
-        try {
-          await fetch(settings.whatsapp_url, {
+        promises.push(
+          fetch(settings.whatsapp_url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             mode: 'no-cors',
             body: messageBody
-          });
-        } catch (error) {
-          console.error("Error sending WhatsApp webhook:", error);
-        }
+          }).catch(error => console.error("Error sending WhatsApp webhook:", error))
+        );
       }
       
       // Send to Telegram if configured
       if (settings.telegram_url) {
-        try {
-          await fetch(settings.telegram_url, {
+        promises.push(
+          fetch(settings.telegram_url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             mode: 'no-cors',
             body: messageBody
-          });
-        } catch (error) {
-          console.error("Error sending Telegram webhook:", error);
-        }
+          }).catch(error => console.error("Error sending Telegram webhook:", error))
+        );
       }
+      
+      // Wait for all promises to resolve
+      await Promise.all(promises);
     } catch (error) {
       console.error("Error in webhook notification:", error);
     }
-  }, [user, getWebhookSettings]);
+  }, [userId, getWebhookSettings]);
 
   return { 
     sendWebhookNotification,
