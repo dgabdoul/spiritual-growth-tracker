@@ -18,7 +18,7 @@ export const useWebhook = () => {
     try {
       // Use type casting to handle the webhook_settings table that's not in the TypeScript definitions yet
       const { data, error } = await supabase
-        .from('webhook_settings' as any)
+        .from('webhook_settings')
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
@@ -28,7 +28,16 @@ export const useWebhook = () => {
         return null;
       }
       
-      return data as WebhookSettings;
+      // Add explicit type check to make TypeScript happy
+      if (data) {
+        return {
+          whatsapp_url: data.whatsapp_url,
+          telegram_url: data.telegram_url,
+          events: data.events || []
+        } as WebhookSettings;
+      }
+      
+      return null;
     } catch (error) {
       console.error("Exception fetching webhook settings:", error);
       return null;

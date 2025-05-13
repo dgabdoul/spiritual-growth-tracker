@@ -173,4 +173,4 @@ function useToast() {
 }
 
 export { useToast, toast }
-export type { ToasterToast }
+// Remove the conflicting export

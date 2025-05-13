@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,6 +10,12 @@ interface ProfileUpdateData {
   avatar_url?: string;
   is_public?: boolean;
   [key: string]: any; // Allow additional profile fields
+}
+
+interface WebhookSettings {
+  whatsapp_url: string | null;
+  telegram_url: string | null;
+  events: string[];
 }
 
 interface AuthContextType {
@@ -45,13 +50,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     try {
       // Use type assertion to handle webhook_settings table
-      const { data: settings } = await supabase
-        .from('webhook_settings' as any)
+      const { data: settings, error } = await supabase
+        .from('webhook_settings')
         .select('*')
         .eq('user_id', user.id)
         .single();
         
-      if (!settings || !settings.events?.includes(event)) return;
+      if (error || !settings) {
+        console.error("Could not fetch webhook settings:", error);
+        return;
+      }
+        
+      if (!settings.events?.includes(event)) return;
       
       const messageBody = JSON.stringify({
         event,
