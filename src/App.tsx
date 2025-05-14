@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -7,7 +6,7 @@ import { AssessmentProvider } from "./contexts/assessment";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { AnimatePresence } from "framer-motion";
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useCallback } from 'react';
 import LoadingIndicator from './components/LoadingIndicator';
 
 // Lazy-loaded Pages pour les performances avec préchargement
@@ -43,16 +42,17 @@ const queryClient = new QueryClient({
       staleTime: 1000 * 60 * 5, // 5 minutes
       retry: 1, // Réduire le nombre de tentatives pour éviter les requêtes infinies
       refetchOnWindowFocus: false, // Désactiver le refetch automatique
+      gcTime: 1000 * 60 * 10, // 10 minutes pour le garbage collection
     },
   },
 });
 
-// Composant de chargement subtil
-const PageLoader = () => (
+// Composant de chargement subtil - memoized pour éviter les re-rendus inutiles
+const PageLoader = React.memo(() => (
   <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
     <LoadingIndicator size="md" minimal={true} />
   </div>
-);
+));
 
 // Préchargement des routes importantes
 const preloadRoutes = () => {
@@ -74,41 +74,41 @@ function App() {
       return <PageLoader />;
     }
     
-    const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
+    const PrivateRoute = useCallback(({ children }: { children: React.ReactNode }) => {
       if (!user) {
         return <Navigate to="/login" />;
       }
       
       return <>{children}</>;
-    }
+    }, [user]);
     
-    const IndexRoute = () => {
+    const IndexRoute = useCallback(() => {
       if (user) {
         return <Navigate to="/dashboard" replace />;
       }
       
       return <Navigate to="/landing" replace />;
-    };
+    }, [user]);
     
-    const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+    const AdminRoute = useCallback(({ children }: { children: React.ReactNode }) => {
       if (!user || !isAdmin) {
         return <Navigate to="/login" replace />;
       }
       
       return <>{children}</>;
-    };
+    }, [user, isAdmin]);
     
-    const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+    const ProtectedRoute = useCallback(({ children }: { children: React.ReactNode }) => {
       if (!user) {
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/login" />;
       }
       
       return <>{children}</>;
-    };
+    }, [user]);
     
-    const PrintRoute = ({ children }: { children: React.ReactNode }) => {
+    const PrintRoute = useCallback(({ children }: { children: React.ReactNode }) => {
       return <>{children}</>;
-    };
+    }, []);
 
     return (
       <AnimatePresence mode="wait">

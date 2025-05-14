@@ -12,7 +12,7 @@ interface WebhookSettings {
 export const useWebhook = () => {
   const { user } = useAuth();
   
-  // Use memoization for better performance
+  // Utiliser memoization pour de meilleures performances
   const userId = useMemo(() => user?.id, [user?.id]);
   
   const getWebhookSettings = useCallback(async (): Promise<WebhookSettings | null> => {
@@ -26,22 +26,22 @@ export const useWebhook = () => {
         .maybeSingle();
         
       if (error) {
-        console.error("Error fetching webhook settings:", error);
+        console.error("Erreur lors de la récupération des paramètres webhook:", error);
         return null;
       }
       
-      // Add explicit type check to make TypeScript happy
-      if (data) {
-        return {
-          whatsapp_url: data.whatsapp_url,
-          telegram_url: data.telegram_url,
-          events: data.events || []
-        } as WebhookSettings;
+      if (!data) {
+        return null;
       }
       
-      return null;
+      // Casting explicite pour satisfaire TypeScript
+      return {
+        whatsapp_url: data.whatsapp_url ?? null,
+        telegram_url: data.telegram_url ?? null,
+        events: Array.isArray(data.events) ? data.events : []
+      } as WebhookSettings;
     } catch (error) {
-      console.error("Exception fetching webhook settings:", error);
+      console.error("Exception lors de la récupération des paramètres webhook:", error);
       return null;
     }
   }, [userId]);
@@ -61,10 +61,10 @@ export const useWebhook = () => {
         ...payload
       });
       
-      // Use Promise.all to send notifications in parallel
+      // Utiliser Promise.all pour envoyer les notifications en parallèle
       const promises: Promise<any>[] = [];
       
-      // Send to WhatsApp if configured
+      // Envoyer à WhatsApp si configuré
       if (settings.whatsapp_url) {
         promises.push(
           fetch(settings.whatsapp_url, {
@@ -72,11 +72,11 @@ export const useWebhook = () => {
             headers: { 'Content-Type': 'application/json' },
             mode: 'no-cors',
             body: messageBody
-          }).catch(error => console.error("Error sending WhatsApp webhook:", error))
+          }).catch(error => console.error("Erreur lors de l'envoi du webhook WhatsApp:", error))
         );
       }
       
-      // Send to Telegram if configured
+      // Envoyer à Telegram si configuré
       if (settings.telegram_url) {
         promises.push(
           fetch(settings.telegram_url, {
@@ -84,14 +84,14 @@ export const useWebhook = () => {
             headers: { 'Content-Type': 'application/json' },
             mode: 'no-cors',
             body: messageBody
-          }).catch(error => console.error("Error sending Telegram webhook:", error))
+          }).catch(error => console.error("Erreur lors de l'envoi du webhook Telegram:", error))
         );
       }
       
-      // Wait for all promises to resolve
+      // Attendre que toutes les promesses soient résolues
       await Promise.all(promises);
     } catch (error) {
-      console.error("Error in webhook notification:", error);
+      console.error("Erreur dans la notification webhook:", error);
     }
   }, [userId, getWebhookSettings]);
 

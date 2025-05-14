@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 type PageTransitionProps = {
   children: React.ReactNode;
@@ -8,36 +8,35 @@ type PageTransitionProps = {
 };
 
 const PageTransition: React.FC<PageTransitionProps> = ({ children, noAnimation = false }) => {
-  // If noAnimation is true, don't add animation
+  // Si noAnimation est vrai, ne pas ajouter d'animation
   if (noAnimation) {
     return <>{children}</>;
   }
   
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={window.location.pathname}
-        initial={{ opacity: 0 }}
-        animate={{ 
-          opacity: 1,
-          transition: { 
-            duration: 0.2, // Reduced from 0.3
-            ease: "easeOut"
-          }
-        }}
-        exit={{ 
-          opacity: 0,
-          transition: { 
-            duration: 0.1, // Reduced from 0.2
-            ease: "easeIn"
-          }
-        }}
-        className="w-full"
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    <motion.div
+      key={window.location.pathname}
+      initial={{ opacity: 0 }}
+      animate={{ 
+        opacity: 1,
+        transition: { 
+          duration: 0.15, // Réduit de 0.2 à 0.15 pour une animation plus rapide
+          ease: "easeOut"
+        }
+      }}
+      exit={{ 
+        opacity: 0,
+        transition: { 
+          duration: 0.1, // Maintenir 0.1 pour une sortie rapide
+          ease: "easeIn"
+        }
+      }}
+      className="w-full"
+    >
+      {children}
+    </motion.div>
   );
 };
 
-export default React.memo(PageTransition); // Add memoization to prevent unnecessary re-renders
+// Utiliser React.memo pour éviter les re-rendus inutiles
+export default React.memo(PageTransition);
