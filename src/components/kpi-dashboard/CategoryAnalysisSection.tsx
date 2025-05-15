@@ -28,15 +28,19 @@ const CategoryAnalysisSection: React.FC<CategoryAnalysisSectionProps> = ({
   setSelectedCategory,
   averageScores
 }) => {
-  const getLatestScore = () => {
+  const getLatestScore = (): number => {
     if (assessments.length === 0) return 0;
     
-    return selectedCategory === 'overall' 
+    // Ensure we return a number type by using Number() for type conversion
+    const score = selectedCategory === 'overall' 
       ? assessments[0].overall_score
       : assessments[0][`${selectedCategory}_score` as keyof Assessment];
+      
+    // Convert to number to ensure return type is number
+    return typeof score === 'number' ? score : 0;
   };
 
-  const getScoreDifference = () => {
+  const getScoreDifference = (): number | undefined => {
     if (assessments.length <= 1) return undefined;
     
     const latest = selectedCategory === 'overall' 
@@ -47,6 +51,7 @@ const CategoryAnalysisSection: React.FC<CategoryAnalysisSectionProps> = ({
       ? assessments[1].overall_score
       : assessments[1][`${selectedCategory}_score` as keyof Assessment];
     
+    // Ensure we're returning a number
     return Number(latest) - Number(previous);
   };
 
