@@ -2,6 +2,7 @@
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Brain, Heart, Lightbulb, Users, Coins, TrendingUp } from 'lucide-react';
+import React from 'react';
 
 export interface Assessment {
   id: string;
@@ -108,7 +109,7 @@ export const getCategoryColor = (category: string): string => {
   }
 };
 
-export const getCategoryIcon = (category: string) => {
+export const getCategoryIcon = (category: string): React.ReactNode => {
   switch (category) {
     case 'psychology': return <Brain className="h-6 w-6" />;
     case 'health': return <Heart className="h-6 w-6" />;
