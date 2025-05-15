@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAssessment, Category } from '@/contexts/assessment';
 import Header from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Brain, Heart, Lightbulb, Users, Coins } from 'lucide-react';
+import { Brain, Heart, Lightbulb, Users, Coins, ChartBar } from 'lucide-react';
 import CategoryCard from '@/components/CategoryCard';
 import { Button } from '@/components/ui/button';
 import { generate } from '@/integrations/replicate';
@@ -174,8 +174,12 @@ const Dashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               <p>Here's a snapshot of your spiritual journey.</p>
-              <div className="mt-4">
+              <div className="mt-4 flex flex-wrap gap-2">
                 <Button onClick={() => navigate('/assessment')}>Take New Assessment</Button>
+                <Button variant="outline" onClick={() => navigate('/kpi-dashboard')} className="flex items-center gap-2">
+                  <ChartBar className="h-4 w-4" />
+                  View KPI Dashboard
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -242,8 +246,12 @@ const Dashboard: React.FC = () => {
         </div>
 
         <Card className="mt-8 bg-white shadow-md">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Progression au fil du temps</CardTitle>
+            <Button variant="ghost" onClick={() => navigate('/kpi-dashboard')} className="flex items-center gap-2">
+              <ChartBar className="h-4 w-4" />
+              Analyse détaillée
+            </Button>
           </CardHeader>
           <CardContent>
             {chartData.length > 0 ? (

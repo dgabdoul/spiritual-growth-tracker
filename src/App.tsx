@@ -1,3 +1,4 @@
+
 import React, { Suspense, lazy, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
@@ -17,6 +18,7 @@ const RegisterPage = lazy(() => import("./pages/Auth/RegisterPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/Auth/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("./pages/Auth/ResetPasswordPage"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const KpiDashboard = lazy(() => import("./pages/KpiDashboard"));
 const AssessmentStart = lazy(() => import("./pages/Assessment/AssessmentStart"));
 const AssessmentCategory = lazy(() => import("./pages/Assessment/AssessmentCategory"));
 const AssessmentResults = lazy(() => import("./pages/Assessment/AssessmentResults"));
@@ -172,6 +174,14 @@ function App() {
             <ProtectedRoute>
               <Suspense fallback={<PageLoader />}>
                 <Dashboard />
+              </Suspense>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/kpi-dashboard" element={
+            <ProtectedRoute>
+              <Suspense fallback={<PageLoader />}>
+                <KpiDashboard />
               </Suspense>
             </ProtectedRoute>
           } />
