@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -436,7 +435,7 @@ const KpiDashboard: React.FC = () => {
                                   const previous = selectedCategory === 'overall' 
                                     ? assessments[1].overall_score
                                     : assessments[1][`${selectedCategory}_score` as keyof Assessment];
-                                  const diff = latest - previous;
+                                  const diff = Number(latest) - Number(previous);
                                   return (
                                     <>
                                       {diff > 0 ? (

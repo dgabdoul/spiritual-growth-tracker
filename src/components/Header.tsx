@@ -11,11 +11,11 @@ import { ChartBar, LineChart } from 'lucide-react';
 
 const EnhancedHeader = () => {
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   
   const handleLogout = async () => {
     try {
-      await logout();
+      await signOut();
       toast({
         title: "Déconnexion réussie",
         description: "Vous avez été déconnecté avec succès.",
