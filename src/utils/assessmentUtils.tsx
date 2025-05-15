@@ -1,4 +1,3 @@
-
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Brain, Heart, Lightbulb, Users, Coins, TrendingUp } from 'lucide-react';
