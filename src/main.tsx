@@ -4,13 +4,13 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
 
-// Create a strict 'rootElement' check
+// Vérification stricte de l'élément racine
 const rootElement = document.getElementById('root');
-if (!rootElement) throw new Error('Failed to find the root element');
+if (!rootElement) throw new Error('Élément racine non trouvé');
 
 const root = createRoot(rootElement);
 
-// Make sure to wrap the App component with StrictMode
+// Assurons-nous que l'App est bien encapsulée dans StrictMode
 root.render(
   <React.StrictMode>
     <App />
