@@ -1,4 +1,3 @@
-
 import React, { Suspense, lazy, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
@@ -115,7 +114,8 @@ function App() {
     return (
       <AnimatePresence mode="wait">
         <Routes>
-          <Route path="/" element={<IndexRoute />} />
+          {/* Make sure the root path is correct */}
+          <Route path="/" element={<Navigate to="/landing" replace />} />
           
           {/* Public Routes */}
           <Route path="/landing" element={
